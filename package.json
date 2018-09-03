@@ -1,0 +1,26 @@
+{
+  "name": "dispatch",
+  "version": "0.0.1",
+  "description": "Dispatch",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/koga73/dispatch.git"
+  },
+  "author": "AJ Savino",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/koga73/dispatch/issues"
+  },
+  "homepage": "https://github.com/koga73/dispatch#readme",
+  "dependencies": {
+    "body-parser": "^1.18.3",
+    "express": "^4.16.3",
+    "gulp": "^3.9.1",
+    "gulp-sass": "^4.0.1",
+    "ws": "^6.0.0"
+  }
+}

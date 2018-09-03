@@ -1,0 +1,12 @@
+@import "reset";
+@import "colors";
+
+html, body {
+	height:100%;
+}
+
+body {
+	background-color:$color-light;
+	color:$color-dark;
+	font-family:arial, sans-serif;
+}
