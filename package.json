@@ -1,26 +1,36 @@
 {
-  "name": "dispatch",
-  "version": "0.0.1",
-  "description": "Dispatch",
-  "main": "app.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/koga73/dispatch.git"
-  },
-  "author": "AJ Savino",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/koga73/dispatch/issues"
-  },
-  "homepage": "https://github.com/koga73/dispatch#readme",
-  "dependencies": {
-    "body-parser": "^1.18.3",
-    "express": "^4.16.3",
-    "gulp": "^3.9.1",
-    "gulp-sass": "^4.0.1",
-    "ws": "^6.0.0"
-  }
+ "name": "paranoid",
+ "version": "0.0.1",
+ "description": "Paranoid",
+ "main": "app.js",
+ "scripts": {
+  "clean": "gulp clean",
+  "build": "gulp build",
+  "start": "node src/server/app.js"
+ },
+ "repository": {
+  "type": "git",
+  "url": "git+https://github.com/koga73/paranoid.git"
+ },
+ "author": "AJ Savino",
+ "license": "ISC",
+ "bugs": {
+  "url": "https://github.com/koga73/paranoid/issues"
+ },
+ "homepage": "https://github.com/koga73/paranoid#readme",
+ "dependencies": {
+  "body-parser": "^1.19.0",
+  "express": "^4.17.1",
+  "ws": "^6.2.1"
+ },
+ "devDependencies": {
+  "del": "^3.0.0",
+  "gulp": "^3.9.1",
+  "gulp-concat": "^2.6.1",
+  "gulp-sass": "^4.0.1",
+  "gulp-sourcemaps": "^2.6.5",
+  "gulp-uglify": "^3.0.2",
+  "natives": "^1.1.6",
+  "run-sequence": "^2.2.1"
+ }
 }
