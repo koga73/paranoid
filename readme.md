@@ -24,12 +24,12 @@
 - Desktop is safer than Mobile
 
 ## Install
-```npm i -g gulp@3.9.1```
-```npm i``
+- ```npm i -g gulp@3.9.1```
+- ```npm i```
 
 ## Build
-```npm run build```
+- ```npm run build```
 
 ## Run
-```npm run start```
-https://localhost:8888
+- ```npm run start```
+- https://localhost:8888
