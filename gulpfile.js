@@ -17,7 +17,8 @@ const config = {
 			input:[
 				src + "client/*.html",
 				src + "client/**/vue.js",
-				src + "client/**/vue.min.js"
+				src + "client/**/vue.min.js",
+				src + "shared/**/cipher-plugins/*.js",
 			],
 			output:dst
 		}
@@ -29,7 +30,13 @@ const config = {
 				src + "client/js/_lib/promise-polyfill.js",
 				src + "client/js/_lib/oop.js",
 				src + "client/js/_lib/axios.js",
-				src + "client/js/page.js",
+				src + "client/js/models/cipher.js",
+				src + "client/js/models/relay.js",
+				src + "client/js/models/account.js",
+				src + "client/js/components/preferences.js",
+				src + "client/js/components/relays.js",
+				src + "client/js/components/accounts.js",
+				src + "client/js/page.js"
 			],
 			output:dst + "js/"
 		}

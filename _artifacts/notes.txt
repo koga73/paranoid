@@ -1,0 +1,11 @@
+UI requirements
+- Download source code
+- Add/remove servers
+- Export/import connection
+- Connect to mulitple servers
+- Read/send messages
+- Register / login
+- Change username / generate keys
+- Export/import keys
+- Load crypto plugin
+- Add optional password to message

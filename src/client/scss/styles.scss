@@ -1,12 +1,4 @@
 @import "reset";
-@import "colors";
-
-html, body {
-	height:100%;
-}
-
-body {
-	background-color:$color-dark;
-	color:$color-light;
-	font-family:arial, sans-serif;
-}
+@import "variables";
+@import "mixins";
+@import "global";

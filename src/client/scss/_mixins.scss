@@ -1,0 +1,35 @@
+@mixin bp($breakpoint, $direction:'max') {
+    // If the key exists in the map
+    @if map-has-key($breakpoints, $breakpoint) {
+        // Prints a media query based on the value
+        @if ($direction=='max') {
+            @media (max-width: map-get($breakpoints, $breakpoint)) {
+                @content;
+            }
+        }
+        @else {
+            @media (min-width: map-get($breakpoints, $breakpoint)) {
+                @content;
+            }
+        }
+    }
+
+    // If the key doesn't exist in the map
+    @else {
+        @warn "Unfortunately, no value could be retrieved from `#{$breakpoint}`. "
+        + "Available breakpoints are: #{map-keys($breakpoints)}.";
+    }
+}
+
+@function toEm($font-size: 16, $default-size: 16) {
+    @return #{$font-size / $default-size}em;
+}
+
+@function space($multiple: 1, $base: 8){
+    @return #{$multiple * $base}px;
+}
+
+@mixin outline {
+    outline: 2px solid #5E9ED6;
+    outline: 5px auto -webkit-focus-ring-color;
+}
