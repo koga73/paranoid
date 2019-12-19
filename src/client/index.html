@@ -14,224 +14,268 @@
 	<body>
 		<div id="page">
 			<header v-cloak>
-				<h1>Paranoid</h1>
-				<nav>
-					<ul>
-						<li>
-							<a href="#preferences" accesskey="1" v-bind:title="accessKeyShortcut + '1'">Preferences</a>
-						</li>
-						<li>
-							<a href="#relays" accesskey="2" v-bind:title="accessKeyShortcut + '2'">Relays</a>
-						</li>
-						<li>
-							<a href="#accounts" accesskey="3" v-bind:title="accessKeyShortcut + '3'">Accounts</a>
-						</li>
-					</ul>
-				</nav>
+				<div class="wrap clr">
+					<a href="#" accesskey="0" v-bind:title="accessKeyShortcut + '0'">
+						<h1>Paranoid</h1>
+					</a>
+					<nav>
+						<ul>
+							<li>
+								<a href="#preferences" v-bind:class="{active:route == 'preferences'}" accesskey="1" v-bind:title="accessKeyShortcut + '1'">Preferences</a>
+							</li>
+							<li>
+								<a href="#relays" v-bind:class="{active:route == 'relays'}" accesskey="2" v-bind:title="accessKeyShortcut + '2'">Relays</a>
+							</li>
+							<li>
+								<a href="#accounts" v-bind:class="{active:route == 'accounts'}" accesskey="3" v-bind:title="accessKeyShortcut + '3'">Accounts</a>
+							</li>
+						</ul>
+					</nav>
+				</div>
 			</header>
 			<main v-cloak>
 
-				<preferences inline-template>
+				<preferences inline-template v-if="route == 'preferences'">
 					<section id="preferences">
-						<h2>Preferences</h2>
-						<a class="btnClose" href="/">Close</a>
+						<div class="wrap">
+							<h2>Preferences</h2>
+						</div>
 
-						<section>
-							<h3>Crypto Plugins</h3>
-							<strong class="notes">DO NOT MODIFY THIS SECTION UNLESS YOU TRUST THE CODE YOU ARE EXECUTING!</strong>
-							<button v-if="!cryptoVisible" v-on:click="handler_showMeCrypto_click">I know what I'm doing</button>
-							<ul class="notes">
-								<li>Some ciphers are supported out of the box such as RSA and AES.</li>
-								<li>To add a new cipher populate the "source" field with a link to javascript cipher code or raw javascript code</li>
-							</ul>
-							<form v-if="cryptoVisible">
-								<table>
-									<thead>
-										<tr>
-											<th>Type</th>
-											<th>Name</th>
-											<th>Source</th>
-											<th>Actions</th>
-										</tr>
-									</thead>
-									<tbody>
-										<tr v-for="(cipher, index) in ciphers">
-											<td>{{cipher.type}}</td>
-											<td>{{cipher.name}}</td>
-											<td><textarea readonly>{{cipher.source}}</textarea></td>
-											<td>
-												<button v-on:click="handler_cipher_unload(cipher, index)" title="Unload this cipher">Unload</button>
-											</td>
-										</tr>
-										<tr>
-											<td>
-												<label for="sltType">Type</label>
-												<select id="sltType" v-model="cipherNew.type">
-													<option v-for="cipherType in cipherTypes" value="cipherType">{{cipherType}}</option>
-												</select>
-											</td>
-											<td>
-												<label for="txtCipherNewName">Name</label>
-												<input id="txtCipherNewName" v-model="cipherNew.name" required/>
-											</td>
-											<td>
-												<label for="txtCipherNewSource" title="URL or raw javascript">Source</label>
-												<textarea id="txtCipherNewSource" v-model="cipherNew.source" required></textarea>
-											</td>
-											<td>
-												<button type="submit" v-on:click="handler_cipher_loadSource" title="Load cipher plugin from source field">Load from source</button>
-												<button v-on:click="handler_cipher_loadDevice" title="Load a cipher plugin from your device into your browser">Load from device</button>
-											</td>
-										</tr>
-									</tbody>
-								</table>
-							</form>
+						<section id="crypto" class="bg-purp">
+							<div class="wrap">
+								<h3>Crypto Plugins</h3>
+								<strong class="notes"><em>DO NOT MODIFY THIS SECTION UNLESS YOU TRUST THE CODE YOU ARE EXECUTING!</em></strong>
+								<ul class="notes">
+									<li>Some ciphers are supported out of the box such as RSA and AES.</li>
+									<li>To add a new cipher populate the "source" field with a link to javascript cipher code or raw javascript code</li>
+								</ul>
+								<button class="btn" v-if="!cryptoVisible" v-on:click="handler_showMeCrypto_click">I know what I'm doing</button>
+								<form class="scroll-wrap" v-if="cryptoVisible">
+									<table>
+										<thead>
+											<tr>
+												<th>Type</th>
+												<th>Name</th>
+												<th>Source</th>
+												<th>Actions</th>
+											</tr>
+										</thead>
+										<tbody>
+											<tr v-for="(cipher, index) in ciphers">
+												<td>{{cipher.type}}</td>
+												<td>{{cipher.name}}</td>
+												<td>
+													<div class="input-wrap">
+														<textarea readonly>{{cipher.source}}</textarea>
+													</div>
+												</td>
+												<td>
+													<button class="btn" v-on:click="handler_cipher_unload(cipher, index)" title="Unload this cipher">Unload</button>
+												</td>
+											</tr>
+											<tr>
+												<td>
+													<div class="select-wrap">
+														<label for="sltType" class="seo">Type</label>
+														<select id="sltType" v-model="cipherNew.type" required>
+															<option v-for="cipherType in cipherTypes" value="cipherType">{{cipherType}}</option>
+														</select>
+													</div>
+												</td>
+												<td>
+													<div class="input-wrap">
+														<label for="txtCipherNewName" class="seo">Name</label>
+														<input id="txtCipherNewName" v-model="cipherNew.name" placeholder="Name" required/>
+													</div>
+												</td>
+												<td>
+													<div class="input-wrap">
+														<label for="txtCipherNewSource" class="seo" title="URL or raw javascript">Source</label>
+														<textarea id="txtCipherNewSource" v-model="cipherNew.source" placeholder="Source" required></textarea>
+													</div>
+												</td>
+												<td>
+													<button class="btn" type="submit" v-on:click="handler_cipher_loadSource" title="Load cipher plugin from source field">Load from source</button>
+													<button class="btn" v-on:click="handler_cipher_loadDevice" title="Load a cipher plugin from your device into your browser">Load from device</button>
+												</td>
+											</tr>
+										</tbody>
+									</table>
+								</form>
+							</div>
 						</section>
 
 					</section>
 				</preferences>
 
-				<relays inline-template>
+				<relays inline-template v-if="route == 'relays'">
 					<section id="relays">
-						<h2>Manage Relays</h2>
-						<a class="btnClose" href="/">Close</a>
-						<ul class="notes">
-							<li>Your browser connects to one or more relays.</li>
-							<li>Relays forward messages to clients and other relays.</li>
-							<li>Relays <em title="you should assume that someone is storing every message">should not</em> store messages.</li>
-						</ul>
-						<form>
-							<!-- TODO: XSRF TOKEN -->
-							<table>
-								<thead>
-									<tr>
-										<th>Enabled</th>
-										<th>Name</th>
-										<th>IP</th>
-										<th>Actions</th>
-									</tr>
-								</thead>
-								<tbody>
-									<tr v-for="(relay, index) in relays">
-										<td>
-											<input v-bind:id="'chkRelayEnabled_' + relay.name" type="checkbox" v-model="relay.enabled"/>
-											<label v-bind:for="'chkRelayEnabled_' + relay.name" class="seo">
-												{{relay.enabled ? "Currently Enabled" : "Currently Disabled"}}
-											</label>
-										</td>
-										<td>{{relay.name}}</td>
-										<td>{{relay.ip}}</td>
-										<td>
-											<button v-on:click="handler_relay_remove(relay, index)" title="Remove this relay from your browser">Remove</button>
-											<button v-on:click="handler_relay_export(relay)" title="Export this relay to a downloadable json file">Export</button>
-										</td>
-									</tr>
-									<tr>
-										<td>
-											<input id="chkRelayNewEnabled" type="checkbox" v-model="relayNew.enabled"/>
-											<label for="chkRelayNewEnabled" class="seo">
-												{{relayNew.enabled ? "Currently Enabled" : "Currently Disabled"}}
-											</label>
-										</td>
-										<td>
-											<label for="txtRelayNewName">Name</label>
-											<input id="txtRelayNewName" v-model="relayNew.name" required/>
-										</td>
-										<td>
-											<label for="txtRelayNewIP">IP</label>
-											<!-- NOTE: IPv6? -->
-											<input id="txtRelayNewIP" v-model="relayNew.ip" required pattern="^\d{1,3}.\d{1,3}.\d{1,3}.\d{1,3}$"/>
-										</td>
-										<td>
-											<button type="submit" v-on:click="handler_relay_add" title="Add this relay to your browser">Add</button>
-											<button v-on:click="handler_relay_import" title="Import a relay from your device into your browser">Import</button>
-										</td>
-									</tr>
-								</tbody>
-							</table>
+						<div class="wrap">
+							<h2>Manage Relays</h2>
+							<ul class="notes">
+								<li>Your browser connects to one or more relays.</li>
+								<li>Relays forward messages to clients and other relays.</li>
+								<li>Relays <em title="you should assume that someone is storing every message">should not</em> store messages.</li>
+							</ul>
+						</div>
+						<form class="bg-purp">
+							<div class="wrap">
+								<div class="scroll-wrap">
+									<table>
+										<thead>
+											<tr>
+												<th>Enabled</th>
+												<th>Name</th>
+												<th>IP</th>
+												<th>Actions</th>
+											</tr>
+										</thead>
+										<tbody>
+											<tr v-for="(relay, index) in relays">
+												<td>
+													<div class="check-wrap">
+														<input v-bind:id="'chkRelayEnabled_' + relay.name" type="checkbox" v-model="relay.enabled"/>
+														<label v-bind:for="'chkRelayEnabled_' + relay.name">
+															<span class="seo">{{relay.enabled ? "Currently Enabled" : "Currently Disabled"}}</span>
+														</label>
+													</div>
+												</td>
+												<td>{{relay.name}}</td>
+												<td>{{relay.ip}}</td>
+												<td>
+													<button class="btn" v-on:click="handler_relay_remove(relay, index)" title="Remove this relay from your browser">Remove</button>
+													<button class="btn" v-on:click="handler_relay_export(relay)" title="Export this relay to a downloadable json file">Export</button>
+												</td>
+											</tr>
+											<tr>
+												<td>
+													<div class="check-wrap">
+														<input id="chkRelayNewEnabled" type="checkbox" v-model="relayNew.enabled"/>
+														<label for="chkRelayNewEnabled">
+															<span class="seo">{{relayNew.enabled ? "Currently Enabled" : "Currently Disabled"}}</span>
+														</label>
+													</div>
+												</td>
+												<td>
+													<div class="input-wrap">
+														<label for="txtRelayNewName" class="seo">Name</label>
+														<input id="txtRelayNewName" v-model="relayNew.name" placeholder="Name" required/>
+													</div>
+												</td>
+												<td>
+													<div class="input-wrap">
+														<label for="txtRelayNewIP" class="seo">IP</label>
+														<!-- NOTE: IPv6? -->
+														<input id="txtRelayNewIP" v-model="relayNew.ip" placeholder="xxx.xxx.xxx.xxx" required pattern="^\d{1,3}.\d{1,3}.\d{1,3}.\d{1,3}$"/>
+													</div>
+												</td>
+												<td>
+													<button class="btn" type="submit" v-on:click="handler_relay_add" title="Add this relay to your browser">Add</button>
+													<button class="btn" v-on:click="handler_relay_import" title="Import a relay from your device into your browser">Import</button>
+												</td>
+											</tr>
+										</tbody>
+									</table>
+								</div>
+							</div>
 						</form>
-						<div class="btn-wrap">
-							<button v-on:click="handler_relays_export" title="Export all relays to a downloadable json file">Export all<span class="seo">replays</span></button>
-							<button v-on:click="handler_relays_import" title="Import a json file from your device and populate all relays">Import all<span class="seo">replays</span></button>
-							<button v-on:click="handler_relays_save" title="Save relays in your browser">Save</button>
+						<div class="wrap">
+							<div class="btn-wrap">
+								<button class="btn" v-on:click="handler_relays_export" title="Export all relays to a downloadable json file">Export all<span class="seo">replays</span></button>
+								<button class="btn" v-on:click="handler_relays_import" title="Import a json file from your device and populate all relays">Import all<span class="seo">replays</span></button>
+								<button class="btn" v-on:click="handler_relays_save" title="Save relays in your browser">Save</button>
+							</div>
 						</div>
 					</section>
 				</relays>
 
-				<accounts inline-template>
+				<accounts inline-template v-if="route == 'accounts'">
 					<section id="accounts">
-						<h2>Accounts</h2>
-						<a class="btnClose" href="/">Close</a>
-						<ul class="notes">
-							<li title="Use private browsing or clear your localStorage to remove all data from your browser">Your browser stores one or more accounts.</li>
-							<li>An account consists of a username and an encryption key pair.</li>
-							<li>Your public key is shared with relays while your private key is kept secret <span title="or you can export your username and keys">in your browser.</span></li>
-							<li>To "login" you must have your username and keypair.</li>
-							<li>After 7 days of account inactivity the relay will forget you and someone else can claim your username.</li>
-						</ul>
-						<form>
-							<!-- TODO: XSRF TOKEN -->
-							<table>
-								<thead>
-									<tr>
-										<th>Username</th>
-										<th>Public Key</th>
-										<th>Private Key</th>
-										<th>Actions</th>
-									</tr>
-								</thead>
-								<tbody>
-									<tr v-for="(account, index) in accounts">
-										<td>{{account.username}}</td>
-										<td>{{account.publicKey}}</td>
-										<td>
-											<input v-bind:id="'chkAccountShowPrivate_' + account.username" type="checkbox" v-model="account.showPrivate"/>
-											<label v-bind:for="'chkAccountShowPrivate_' + account.username">
-												{{!account.showPrivate ? "Show" : "Hide"}}
-											</label>
-											<span class="private">
-												{{account.privateKey}}
-											</span>
-										</td>
-										<td>
-											<button v-on:click="handler_account_remove(account, index)" title="Remove this account from your browser">Remove</button>
-											<button v-on:click="handler_account_export(account)" title="Export this account to a downloadable json file">Export</button>
-											<button v-on:click="handler_account_change(account)" title="Generate new keys and register the new public key with the relay">Change keys</button>
-										</td>
-									</tr>
-									<tr>
-										<td>
-											<label for="txtAccountUsername">Username</label>
-											<input id="txtAccountUsername" v-model="accountNew.username" required/>
-										</td>
-										<td colspan="2">
-											<span>Keypair will be generated upon add</span>
-										</td>
-										<td>
-											<button type="submit" v-on:click="handler_account_add" title="Add this account to your browser">Add</button>
-											<button v-on:click="handler_account_import" title="Import an account from your device into your browser">Import</button>
-										</td>
-									</tr>
-								</tbody>
-							</table>
+						<div class="wrap">
+							<h2>Accounts</h2>
+							<ul class="notes">
+								<li title="Use private browsing or clear your localStorage to remove all data from your browser">Your browser stores one or more accounts.</li>
+								<li>An account consists of a username and an encryption key pair.</li>
+								<li>Your public key is shared with relays while your private key is kept secret <span title="or you can export your username and keys">in your browser.</span></li>
+								<li>To "login" you must have your username and key pair.</li>
+								<li>After 7 days of account inactivity the relay will forget you and someone else can claim your username.</li>
+							</ul>
+						</div>
+						<form class="bg-purp">
+							<div class="wrap">
+								<div class="scroll-wrap">
+									<!-- TODO: XSRF TOKEN -->
+									<table>
+										<thead>
+											<tr>
+												<th>Username</th>
+												<th>Public Key</th>
+												<th>Private Key</th>
+												<th>Actions</th>
+											</tr>
+										</thead>
+										<tbody>
+											<tr v-for="(account, index) in accounts">
+												<td>{{account.username}}</td>
+												<td>{{account.publicKey}}</td>
+												<td>
+													<div class="check-wrap">
+														<input v-bind:id="'chkAccountShowPrivate_' + account.username" type="checkbox" v-model="account.showPrivate"/>
+														<label v-bind:for="'chkAccountShowPrivate_' + account.username">
+															{{!account.showPrivate ? "Show" : "Hide"}}
+														</label>
+													</div>
+													<span class="private">
+														{{account.privateKey}}
+													</span>
+												</td>
+												<td>
+													<button class="btn" v-on:click="handler_account_remove(account, index)" title="Remove this account from your browser">Remove</button>
+													<button class="btn" v-on:click="handler_account_export(account)" title="Export this account to a downloadable json file">Export</button>
+													<button class="btn" v-on:click="handler_account_change(account)" title="Generate new keys and register the new public key with the relay">Change keys</button>
+												</td>
+											</tr>
+											<tr>
+												<td>
+													<div class="input-wrap">
+														<label for="txtAccountUsername" class="seo">Username</label>
+														<input id="txtAccountUsername" v-model="accountNew.username" placeholder="Username" required/>
+													</div>
+												</td>
+												<td colspan="2">
+													<span>Key pair will be generated upon add</span>
+												</td>
+												<td>
+													<button class="btn" type="submit" v-on:click="handler_account_add" title="Add this account to your browser">Add</button>
+													<button class="btn" v-on:click="handler_account_import" title="Import an account from your device into your browser">Import</button>
+												</td>
+											</tr>
+										</tbody>
+									</table>
+								</div>
+							</div>
 						</form>
-						<div class="btn-wrap">
-							<button v-on:click="handler_accounts_export" title="Export all accounts to a downloadable json file">Export all<span class="seo">accounts</span></button>
-							<button v-on:click="handler_accounts_import" title="Import a json file from your device and populate all accounts">Import all<span class="seo">accounts</span></button>
-							<button v-on:click="handler_accounts_save" title="Save accounts in your browser">Save</button>
+						<div class="wrap">
+							<div class="btn-wrap">
+								<button class="btn" v-on:click="handler_accounts_export" title="Export all accounts to a downloadable json file">Export all<span class="seo">accounts</span></button>
+								<button class="btn" v-on:click="handler_accounts_import" title="Import a json file from your device and populate all accounts">Import all<span class="seo">accounts</span></button>
+								<button class="btn" v-on:click="handler_accounts_save" title="Save accounts in your browser">Save</button>
+							</div>
 						</div>
 					</section>
 				</accounts>
 
-				<section>
+				<section id="chat" class="wrap" v-if="route == ''">
 					<h2>Chat</h2>
 				</section>
 
 			</main>
 			<footer v-cloak>
-				<p>&copy;Copyright 2019 AJ Savino</p>
-				<!-- TODO: This should download from the relay rather than github to ensure mirrors -->
-				<a href="https://github.com/koga73/paranoid/releases">Download source code</a>
+				<div class="wrap">
+					<p>&copy;Copyright 2019 AJ Savino</p>
+					<!-- TODO: This should download from the relay rather than github to ensure mirrors -->
+					<a href="https://github.com/koga73/paranoid/releases" target="_blank">Download source code</a>
+				</div>
 			</footer>
 		</div>
 	</body>

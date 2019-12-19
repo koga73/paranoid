@@ -1,0 +1,324 @@
+label {
+    cursor:pointer;
+}
+input[disabled] + label {
+    cursor:default;
+}
+
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance:none;
+    margin:0;
+}
+input[type="number"] {
+    -moz-appearance:textfield;
+}
+
+span.error {
+    color:$color-primary-1;
+    display:none;
+    margin:space(2) 0;
+
+    &.show {
+        display:block;
+    }
+}
+
+.radio-wrap {
+	position:relative;
+	display:inline-block;
+	text-align:left;
+
+    input {
+        position:absolute;
+        top:0;
+        left:0;
+        opacity:0;
+
+        &[disabled] + label {
+            color:$color-disabled;
+
+            &:before {
+                border-color:$color-disabled;
+            }
+        }
+
+        &:not([disabled]) + label {
+            cursor:pointer;
+        }
+
+        //Validation
+        &.error:not(:valid) {
+            & + label {
+                color:$color-primary-1;
+
+                &:before {
+                    border-color:$color-primary-1;
+                }
+            }
+
+            & ~ .error {
+                display:block;
+            }
+        }
+
+        &:checked + label {
+            color:$color-black;
+
+            &:after {
+                opacity:1;
+            }
+        }
+
+        //Focus outline for label
+        &:focus + label:before {
+            @include outline;
+        }
+    }
+
+    label {
+        z-index:1;
+        position:relative;
+        line-height:toEm(32, 16);
+        padding-left:space(4.5);
+
+        &:before {
+            content:"";
+            display:block;
+            position:absolute;
+            top:0;
+            left:0;
+            width:18px;
+            height:18px;
+            border-radius:18px;
+			border:1px solid $color-black;
+			background-color:$color-white;
+        }
+
+        &:after {
+            content:"";
+            display:block;
+            position:absolute;
+            top:6px;
+            left:6px;
+            width:8px;
+            height:8px;
+            border-radius:8px;
+            background-color:$color-black;
+            opacity:0;
+        }
+    }
+
+    span.error {
+        margin:space(3) 0;
+    }
+}
+
+.input-wrap {
+	position:relative;
+	display:inline-block;
+	text-align:left;
+
+    label {
+        display:inline-block;
+        padding-bottom:space(1);
+    }
+
+    input, textarea {
+        display:block;
+        z-index:1;
+        position:relative;
+        box-sizing:border-box;
+        padding:space(1);
+        font-size:toEm(14);
+        line-height:toEm(14, 14);
+        border-radius:2px;
+        border:1px solid $color-secondary-1-0;
+
+        //Validation
+        &.error:not(:valid) {
+            //background-color:#f3c6c6;
+            border-bottom:2px solid $color-primary-1;
+
+            & ~ .error {
+                display:block;
+            }
+        }
+
+        &:focus + label {
+            z-index:2;
+            visibility:visible;
+            padding:0 2px;
+            //background-color:$color-charcoal;
+            //color:$color-white;
+        }
+
+        &[disabled] {
+            background-color:$color-disabled-bg;
+            border-color:$color-disabled;
+        }
+    }
+    //text, number, email, tel
+    input {
+        @include bp('sm') {
+            width:100%;
+        }
+    }
+
+    textarea {
+        display:block;
+		min-width:320px;
+		min-height:34px;
+		width:320px;
+		height:34px;
+
+        @include bp('sm') {
+            width:100%;
+        }
+    }
+
+    span.error {
+        margin:space(0.5) 0;
+    }
+}
+
+.check-wrap {
+	position:relative;
+	display:inline-block;
+	text-align:left;
+	width:20px;
+	height:20px;
+	margin:auto;
+
+    input {
+        position:absolute;
+        top:0;
+        left:0;
+        opacity:0;
+
+        &[disabled] + label {
+            color:$color-disabled;
+
+            &:before {
+                border-color:$color-disabled;
+            }
+
+            .fa {
+                color:$color-disabled !important;
+            }
+        }
+
+        &:not([disabled]) + label {
+            cursor:pointer;
+        }
+
+        //Validation
+        &.error:not(:valid) {
+            & + label {
+                color:$color-primary-1;
+
+                &:before {
+                    border-color:$color-primary-1;
+                }
+            }
+
+            & ~ .error {
+                display:block;
+            }
+        }
+
+        &:checked {
+            & + label {
+                font-weight:bold;
+
+                &:after {
+                    opacity:1;
+                }
+
+                .fa {
+                    opacity:1;
+                    color:$color-black;
+                }
+            }
+        }
+
+        //Focus outline for label
+        &:focus + label:before {
+            @include outline;
+        }
+    }
+
+    label {
+        box-sizing:border-box;
+        display:inline-block;
+        padding-left:space(5);
+		position:absolute;
+		top:0;
+		left:0;
+        z-index:1;
+        line-height:20px; //Fixed size
+
+        &:before {
+            content:"";
+            display:inline-block;
+            border:1px solid $color-black;
+            width:18px;
+            height:18px;
+            border-radius:2px;
+            position:absolute;
+            left:0;
+            top:0;
+			margin-right:space(1);
+			background-color:$color-white;
+        }
+
+        &:after {
+            content:"";
+            display:block;
+            position:absolute;
+            top:6px;
+            left:6px;
+            width:8px;
+            height:8px;
+            background-color:$color-black;
+            opacity:0;
+        }
+
+        .fa {
+            opacity:0;
+            position:absolute;
+            font-size:12px;
+            top:9px;
+            left:8px;
+            transform:translate(-35%, -35%);
+            z-index:1;
+            background-color:$color-white;
+        }
+    }
+
+    span.error {
+        margin:space(1) 0;
+    }
+}
+
+.select-wrap {
+	position:relative;
+	display:inline-block;
+	text-align:left;
+
+    label {
+        display:inline-block;
+        padding-bottom:space(1);
+    }
+
+    select {
+        display:block;
+        box-sizing:border-box;
+        padding:space(1);
+        cursor:pointer;
+
+        &[disabled]{
+            cursor:default;
+        }
+    }
+}

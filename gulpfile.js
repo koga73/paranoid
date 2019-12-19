@@ -44,7 +44,7 @@ const config = {
 	sass:{
 		name:"sass",
 		files:{
-			input:src + "client/scss/*.scss",
+			input:src + "client/scss/**/*.scss",
 			output:dst + "css/"
 		}
 	}

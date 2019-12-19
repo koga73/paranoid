@@ -2,23 +2,28 @@
 	new Vue({
 		el: "#page",
 		data: {
-			test:"TEST ME 123"
+			route:window.location.hash.substr(1),
 		},
 		computed: {
-			accessKeyShortcut: function() {
+			accessKeyShortcut:function() {
 				return this.isFirefox ? "Alt + Shift + " : "Alt + ";
 			},
 
-			isFirefox: function() {
+			isFirefox:function() {
 				return isFirefox = navigator.userAgent.indexOf("Firefox") != -1;
 			},
 
-			isIE: function() {
+			isIE:function() {
 				return window.navigator.userAgent.match(/(MSIE|Trident)/);
 			}
 		},
-		mounted: function() {
-
+		mounted:function() {
+			window.onhashchange = this.handler_hash_change;
+		},
+		methods:{
+			handler_hash_change:function(evt){
+				this.route = window.location.hash.substr(1);
+			}
 		}
 	});
 })();
