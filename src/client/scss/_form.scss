@@ -1,3 +1,31 @@
+button {
+	cursor:pointer;
+
+	&[disabled]{
+		cursor:default;
+	}
+}
+.btn {
+	padding:space(1) space(2);
+	font-weight:bold;
+	background-color:$color-secondary-2-3;
+	color:$color-white;
+	border:1px solid $color-secondary-1-0;
+	border-radius:space(0.5);
+	margin:space(1);
+
+	&[disabled] {
+		background-color:$color-form-bg-disabled;
+	}
+}
+.btn-wrap {
+	float:right;
+
+	.btn:last-child {
+		margin-right:0;
+	}
+}
+
 label {
     cursor:pointer;
 }
@@ -36,10 +64,10 @@ span.error {
         opacity:0;
 
         &[disabled] + label {
-            color:$color-disabled;
+            color:$color-form-bg-disabled;
 
             &:before {
-                border-color:$color-disabled;
+                border-color:$color-form-bg-disabled;
             }
         }
 
@@ -80,7 +108,7 @@ span.error {
         z-index:1;
         position:relative;
         line-height:toEm(32, 16);
-        padding-left:space(4.5);
+        padding-left:space(3.5);
 
         &:before {
             content:"";
@@ -91,8 +119,8 @@ span.error {
             width:18px;
             height:18px;
             border-radius:18px;
-			border:1px solid $color-black;
-			background-color:$color-white;
+			border:1px solid $color-secondary-1-0;
+			background-color:$color-form-bg;
         }
 
         &:after {
@@ -133,7 +161,9 @@ span.error {
         font-size:toEm(14);
         line-height:toEm(14, 14);
         border-radius:2px;
-        border:1px solid $color-secondary-1-0;
+		border:1px solid $color-secondary-1-0;
+		background-color:$color-form-bg;
+		color:$color-white;
 
         //Validation
         &.error:not(:valid) {
@@ -154,8 +184,7 @@ span.error {
         }
 
         &[disabled] {
-            background-color:$color-disabled-bg;
-            border-color:$color-disabled;
+            background-color:$color-form-bg-disabled;
         }
     }
     //text, number, email, tel
@@ -197,14 +226,14 @@ span.error {
         opacity:0;
 
         &[disabled] + label {
-            color:$color-disabled;
+            color:$color-form-bg-disabled;
 
             &:before {
-                border-color:$color-disabled;
+                border-color:$color-form-bg-disabled;
             }
 
             .fa {
-                color:$color-disabled !important;
+                color:$color-form-bg-disabled !important;
             }
         }
 
@@ -251,7 +280,7 @@ span.error {
     label {
         box-sizing:border-box;
         display:inline-block;
-        padding-left:space(5);
+        padding-left:space(4);
 		position:absolute;
 		top:0;
 		left:0;
@@ -261,7 +290,7 @@ span.error {
         &:before {
             content:"";
             display:inline-block;
-            border:1px solid $color-black;
+            border:1px solid $color-secondary-1-0;
             width:18px;
             height:18px;
             border-radius:2px;
@@ -269,7 +298,7 @@ span.error {
             left:0;
             top:0;
 			margin-right:space(1);
-			background-color:$color-white;
+			background-color:$color-form-bg;
         }
 
         &:after {
@@ -280,7 +309,7 @@ span.error {
             left:6px;
             width:8px;
             height:8px;
-            background-color:$color-black;
+            background-color:$color-white;
             opacity:0;
         }
 
@@ -315,7 +344,9 @@ span.error {
         display:block;
         box-sizing:border-box;
         padding:space(1);
-        cursor:pointer;
+		cursor:pointer;
+		background-color:$color-form-bg;
+		color:$color-white;
 
         &[disabled]{
             cursor:default;

@@ -13,7 +13,8 @@
         instance:{
 			name:"",
 			source:"",
-			type:""
+			type:"",
+			fromServer:false
         },
 
         simple:true //We don't want OOP to add _super and _interface to the class since we are saving this in localStorage

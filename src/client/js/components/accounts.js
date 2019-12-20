@@ -7,25 +7,56 @@
 			};
 		},
 		methods:{
-			handler_account_remove:function(account, index){
+			handler_account_remove:function(evt, account, index){
+				evt.preventDefault();
+
 				this.accounts.splice(index, 1);
+
+				return false;
 			},
 
-			handler_account_export:function(){
+			handler_account_export:function(evt){
+				evt.preventDefault();
+
 				console.log("accounts::handler_account_export");
+
+				return false;
 			},
 
-			handler_account_change:function(){
+			handler_account_change:function(evt){
+				evt.preventDefault();
+
 				console.log("accounts::handler_account_change");
+
+				return false;
 			},
 
-			handler_account_add:function(){
+			handler_account_add:function(evt){
+				evt.preventDefault();
+
+				//Validate form
+                var form = this.$refs["frmAccounts"];
+                if (!form.checkValidity()) {
+                    try {
+                        form.reportValidity();
+                    } catch(error) {
+                        //IE11 doesn't support
+                    }
+                    return false;
+                }
+
 				this.accounts.push(this.accountNew);
 				this.accountNew = new Models.Account();
+
+				return false;
 			},
 
-			handler_account_import:function(){
+			handler_account_import:function(evt){
+				evt.preventDefault();
+
 				console.log("accounts::handler_account_import");
+
+				return false;
 			},
 
 			handler_accounts_export:function(){
@@ -34,10 +65,6 @@
 
 			handler_accounts_import:function(){
 				console.log("accounts::handler_accounts_import");
-			},
-
-			handler_accounts_save:function(){
-				console.log("accounts::handler_accounts_save");
 			}
 		}
 	});

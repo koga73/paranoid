@@ -35,7 +35,7 @@
 			</header>
 			<main v-cloak>
 
-				<preferences inline-template v-if="route == 'preferences'">
+				<preferences inline-template v-bind:class="['component', {active:route == 'preferences'}]">
 					<section id="preferences">
 						<div class="wrap">
 							<h2>Preferences</h2>
@@ -50,30 +50,36 @@
 									<li>To add a new cipher populate the "source" field with a link to javascript cipher code or raw javascript code</li>
 								</ul>
 								<button class="btn" v-if="!cryptoVisible" v-on:click="handler_showMeCrypto_click">I know what I'm doing</button>
-								<form class="scroll-wrap" v-if="cryptoVisible">
+								<form ref="frmCrypto" class="scroll-wrap" v-if="cryptoVisible">
 									<table>
 										<thead>
 											<tr>
-												<th>Type</th>
 												<th>Name</th>
+												<th>Type</th>
 												<th>Source</th>
 												<th>Actions</th>
 											</tr>
 										</thead>
 										<tbody>
 											<tr v-for="(cipher, index) in ciphers">
-												<td>{{cipher.type}}</td>
 												<td>{{cipher.name}}</td>
+												<td>{{cipher.type}}</td>
 												<td>
 													<div class="input-wrap">
 														<textarea readonly>{{cipher.source}}</textarea>
 													</div>
 												</td>
 												<td>
-													<button class="btn" v-on:click="handler_cipher_unload(cipher, index)" title="Unload this cipher">Unload</button>
+													<button class="btn" v-on:click="handler_cipher_remove($event, cipher, index)" v-bind:disabled="cipher.fromServer" v-bind:title="(cipher.fromServer) ? 'This plugin was added by the server and cannot be removed' : 'Remove this cipher - To fully unload the cipher from memory you will need to refresh the page'">Remove</button>
 												</td>
 											</tr>
 											<tr>
+												<td>
+													<div class="input-wrap">
+														<label for="txtCipherNewName" class="seo">Name</label>
+														<input type="text" id="txtCipherNewName" v-model="cipherNew.name" placeholder="Name" required minlength="1" maxlength="32" pattern="^[\w-]+$" autocomplete="off"/>
+													</div>
+												</td>
 												<td>
 													<div class="select-wrap">
 														<label for="sltType" class="seo">Type</label>
@@ -84,19 +90,13 @@
 												</td>
 												<td>
 													<div class="input-wrap">
-														<label for="txtCipherNewName" class="seo">Name</label>
-														<input id="txtCipherNewName" v-model="cipherNew.name" placeholder="Name" required/>
-													</div>
-												</td>
-												<td>
-													<div class="input-wrap">
 														<label for="txtCipherNewSource" class="seo" title="URL or raw javascript">Source</label>
 														<textarea id="txtCipherNewSource" v-model="cipherNew.source" placeholder="Source" required></textarea>
 													</div>
 												</td>
 												<td>
-													<button class="btn" type="submit" v-on:click="handler_cipher_loadSource" title="Load cipher plugin from source field">Load from source</button>
-													<button class="btn" v-on:click="handler_cipher_loadDevice" title="Load a cipher plugin from your device into your browser">Load from device</button>
+													<button class="btn" type="submit" v-on:click="handler_cipher_loadSource($event)" title="Load cipher plugin from source field">Load from source</button>
+													<button class="btn" v-on:click="handler_cipher_loadDevice($event)" title="Load a cipher plugin from your device into your browser">Load from device</button>
 												</td>
 											</tr>
 										</tbody>
@@ -108,7 +108,7 @@
 					</section>
 				</preferences>
 
-				<relays inline-template v-if="route == 'relays'">
+				<relays inline-template v-bind:class="['component', {active:route == 'relays'}]">
 					<section id="relays">
 						<div class="wrap">
 							<h2>Manage Relays</h2>
@@ -118,7 +118,7 @@
 								<li>Relays <em title="you should assume that someone is storing every message">should not</em> store messages.</li>
 							</ul>
 						</div>
-						<form class="bg-purp">
+						<form ref="frmRelays" class="bg-purp">
 							<div class="wrap">
 								<div class="scroll-wrap">
 									<table>
@@ -126,7 +126,7 @@
 											<tr>
 												<th>Enabled</th>
 												<th>Name</th>
-												<th>IP</th>
+												<th>Address</th>
 												<th>Actions</th>
 											</tr>
 										</thead>
@@ -141,10 +141,10 @@
 													</div>
 												</td>
 												<td>{{relay.name}}</td>
-												<td>{{relay.ip}}</td>
+												<td>{{relay.address}}</td>
 												<td>
-													<button class="btn" v-on:click="handler_relay_remove(relay, index)" title="Remove this relay from your browser">Remove</button>
-													<button class="btn" v-on:click="handler_relay_export(relay)" title="Export this relay to a downloadable json file">Export</button>
+													<button class="btn" v-on:click="handler_relay_remove($event, relay, index)" title="Remove this relay from your browser">Remove</button>
+													<button class="btn" v-on:click="handler_relay_export($event, relay)" title="Export this relay to a downloadable json file">Export</button>
 												</td>
 											</tr>
 											<tr>
@@ -159,23 +159,24 @@
 												<td>
 													<div class="input-wrap">
 														<label for="txtRelayNewName" class="seo">Name</label>
-														<input id="txtRelayNewName" v-model="relayNew.name" placeholder="Name" required/>
+														<input type="text" id="txtRelayNewName" v-model="relayNew.name" placeholder="Name" required minlength="1" maxlength="32" pattern="^[\w\s!@#$%^&*().:|/\\?-]+$" autocomplete="off"/>
 													</div>
 												</td>
 												<td>
 													<div class="input-wrap">
-														<label for="txtRelayNewIP" class="seo">IP</label>
-														<!-- NOTE: IPv6? -->
-														<input id="txtRelayNewIP" v-model="relayNew.ip" placeholder="xxx.xxx.xxx.xxx" required pattern="^\d{1,3}.\d{1,3}.\d{1,3}.\d{1,3}$"/>
+														<label for="txtRelayNewAddress" class="seo">URL or IP Address</label>
+														<input type="text" id="txtRelayNewAddress" v-model="relayNew.address" placeholder="URL or IP Address" required minlength="1" pattern="^[\w\/.:-]+$" autocomplete="off"/>
 													</div>
 												</td>
 												<td>
-													<button class="btn" type="submit" v-on:click="handler_relay_add" title="Add this relay to your browser">Add</button>
-													<button class="btn" v-on:click="handler_relay_import" title="Import a relay from your device into your browser">Import</button>
+													<button class="btn" type="submit" v-on:click="handler_relay_add($event)" title="Add this relay to your browser">Add</button>
 												</td>
 											</tr>
 										</tbody>
 									</table>
+									<div class="btn-wrap">
+										<button class="btn" v-on:click="handler_relay_import($event)" title="Import a relay from your device into your browser">Import</button>
+									</div>
 								</div>
 							</div>
 						</form>
@@ -183,13 +184,12 @@
 							<div class="btn-wrap">
 								<button class="btn" v-on:click="handler_relays_export" title="Export all relays to a downloadable json file">Export all<span class="seo">replays</span></button>
 								<button class="btn" v-on:click="handler_relays_import" title="Import a json file from your device and populate all relays">Import all<span class="seo">replays</span></button>
-								<button class="btn" v-on:click="handler_relays_save" title="Save relays in your browser">Save</button>
 							</div>
 						</div>
 					</section>
 				</relays>
 
-				<accounts inline-template v-if="route == 'accounts'">
+				<accounts inline-template v-bind:class="['component', {active:route == 'accounts'}]">
 					<section id="accounts">
 						<div class="wrap">
 							<h2>Accounts</h2>
@@ -201,7 +201,7 @@
 								<li>After 7 days of account inactivity the relay will forget you and someone else can claim your username.</li>
 							</ul>
 						</div>
-						<form class="bg-purp">
+						<form ref="frmAccounts" class="bg-purp">
 							<div class="wrap">
 								<div class="scroll-wrap">
 									<!-- TODO: XSRF TOKEN -->
@@ -230,28 +230,30 @@
 													</span>
 												</td>
 												<td>
-													<button class="btn" v-on:click="handler_account_remove(account, index)" title="Remove this account from your browser">Remove</button>
-													<button class="btn" v-on:click="handler_account_export(account)" title="Export this account to a downloadable json file">Export</button>
-													<button class="btn" v-on:click="handler_account_change(account)" title="Generate new keys and register the new public key with the relay">Change keys</button>
+													<button class="btn" v-on:click="handler_account_remove($event, account, index)" title="Remove this account from your browser">Remove</button>
+													<button class="btn" v-on:click="handler_account_export($event, account)" title="Export this account to a downloadable json file">Export</button>
+													<button class="btn" v-on:click="handler_account_change($event, account)" title="Generate new keys and register the new public key with the relay">Change keys</button>
 												</td>
 											</tr>
 											<tr>
 												<td>
 													<div class="input-wrap">
 														<label for="txtAccountUsername" class="seo">Username</label>
-														<input id="txtAccountUsername" v-model="accountNew.username" placeholder="Username" required/>
+														<input type="text" id="txtAccountUsername" v-model="accountNew.username" placeholder="Username" required minlength="1" maxlength="32" pattern="^[\w-]+$" autocomplete="off"/>
 													</div>
 												</td>
 												<td colspan="2">
 													<span>Key pair will be generated upon add</span>
 												</td>
 												<td>
-													<button class="btn" type="submit" v-on:click="handler_account_add" title="Add this account to your browser">Add</button>
-													<button class="btn" v-on:click="handler_account_import" title="Import an account from your device into your browser">Import</button>
+													<button class="btn" type="submit" v-on:click="handler_account_add($event)" title="Add this account to your browser">Add</button>
 												</td>
 											</tr>
 										</tbody>
 									</table>
+									<div class="btn-wrap">
+										<button class="btn" v-on:click="handler_account_import($event)" title="Import an account from your device into your browser">Import</button>
+									</div>
 								</div>
 							</div>
 						</form>
@@ -259,7 +261,6 @@
 							<div class="btn-wrap">
 								<button class="btn" v-on:click="handler_accounts_export" title="Export all accounts to a downloadable json file">Export all<span class="seo">accounts</span></button>
 								<button class="btn" v-on:click="handler_accounts_import" title="Import a json file from your device and populate all accounts">Import all<span class="seo">accounts</span></button>
-								<button class="btn" v-on:click="handler_accounts_save" title="Save accounts in your browser">Save</button>
 							</div>
 						</div>
 					</section>
@@ -272,7 +273,7 @@
 			</main>
 			<footer v-cloak>
 				<div class="wrap">
-					<p>&copy;Copyright 2019 AJ Savino</p>
+					<p>&copy;2019 AJ Savino</p>
 					<!-- TODO: This should download from the relay rather than github to ensure mirrors -->
 					<a href="https://github.com/koga73/paranoid/releases" target="_blank">Download source code</a>
 				</div>

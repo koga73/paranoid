@@ -27,9 +27,13 @@ const config = {
 		name:"js",
 		files:{
 			input:[
+				src + "client/js/polyfill/string.js",
 				src + "client/js/_lib/promise-polyfill.js",
-				src + "client/js/_lib/oop.js",
 				src + "client/js/_lib/axios.js",
+				src + "client/js/_lib/oop.js",
+				src + "client/js/resources/strings.js",
+				src + "client/js/helpers/helpers.js",
+				src + "client/js/helpers/regex-patterns.js",
 				src + "client/js/models/cipher.js",
 				src + "client/js/models/relay.js",
 				src + "client/js/models/account.js",

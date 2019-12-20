@@ -31,6 +31,14 @@ body {
 	overflow:auto;
 }
 
+.component {
+	display:none;
+
+	&.active {
+		display:block;
+	}
+}
+
 h1 {
 	color:$color-primary-0;
 	font-size:toEm(30);
@@ -68,30 +76,6 @@ a {
 
 	&:hover {
 		color:$color-complement-1;
-	}
-}
-
-button {
-	cursor:pointer;
-
-	&[disabled]{
-		cursor:default;
-	}
-}
-.btn {
-	padding:space(1) space(2);
-	font-weight:bold;
-	background-color:$color-secondary-2-3;
-	color:$color-white;
-	border:1px solid $color-secondary-1-0;
-	border-radius:space(0.5);
-	margin:space(1);
-}
-.btn-wrap {
-	float:right;
-
-	.btn:last-child {
-		margin-right:0;
 	}
 }
 
@@ -141,14 +125,16 @@ footer {
     position:relative;
     z-index:80;
 	clear:both;
-	background-color:$color-secondary-2-0;
+	background-color:$color-secondary-2-4;
+	color:$color-secondary-1-4;
 	padding:space(1) 0;
 
 	a {
 		float:right;
+		color:$color-secondary-1-4;
 
 		&:hover {
-			color:$color-white;
+			color:$color-secondary-1-4;
 		}
 	}
 }
