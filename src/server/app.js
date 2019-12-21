@@ -36,6 +36,11 @@ const Log = require("./utils/log");
 			//Static
 			app.use(Express.static(__dirname + "/../../www"));
 
+			//Download portable
+			app.get("paranoid-portable.html", (req, res) => {
+				res.download(__dirname + "/../../www/paranoid-portable.html");
+			});
+
 			//Node server
 			var server = Http.createServer(app);
 			_vars._server = server;

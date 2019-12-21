@@ -5,7 +5,9 @@ const del = require("del");
 const createTask = require("./gulp/create-task");
 const concat = require("gulp-concat");
 const uglify = require("gulp-uglify");
-const sourcemaps = require('gulp-sourcemaps');
+const sourcemaps = require("gulp-sourcemaps");
+const inlinesource = require("gulp-inline-source");
+const rename = require("gulp-rename");
 
 const src = "src/";
 const dst = "www/";
@@ -40,6 +42,7 @@ const config = {
 				src + "client/js/components/preferences.js",
 				src + "client/js/components/relays.js",
 				src + "client/js/components/accounts.js",
+				src + "client/js/components/chat.js",
 				src + "client/js/page.js"
 			],
 			output:dst + "js/"
@@ -120,5 +123,16 @@ function watch(config){
 	return gulp.watch(config.files.input, ["build:" + config.name]);
 }
 createTask("watch", watch, [config.static, config.js, config.sass]);
+
+//portable
+gulp.task("portable", function(){
+	return gulp.src(dst + "index.html")
+				.pipe(inlinesource({
+					attribute:false,
+					rootpath:dst
+				}))
+				.pipe(rename("paranoid-portable.html"))
+				.pipe(gulp.dest(dst));
+});
 
 gulp.task("default", ["build"]);

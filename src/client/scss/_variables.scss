@@ -1,8 +1,18 @@
-$color-white:#FFF;
 $color-black:#111;
+
+$color-white:#FFF;
+$color-white-0:$color-white;
+$color-white-1:#EEE;
+$color-white-2:#DDD;
+$color-white-3:#CCC;
+$color-white-4:#BBB;
+$color-white-5:#AAA;
 
 $color-form-bg:#333;
 $color-form-bg-disabled:#777;
+
+$color-scrollbar-track:#777;
+$color-scrollbar-thumb:#333;
 
 // Palette URL: http://paletton.com/#uid=75C1Z0kT2qqDoM1QnwAUNl6WDf3 */
 $color-primary-0: #D10005;	// Main Primary color */
@@ -28,6 +38,9 @@ $color-complement-1: #0CE800;
 $color-complement-2: #0ACF00;
 $color-complement-3: #078800;
 $color-complement-4: #056100;
+
+$header-height:70px;
+$footer-height:32px;
 
 $screen-xs: 480px;
 $screen-xs-max: 767px;

@@ -15,9 +15,12 @@
 		<div id="page">
 			<header v-cloak>
 				<div class="wrap clr">
-					<a href="#" accesskey="0" v-bind:title="accessKeyShortcut + '0'">
-						<h1>Paranoid</h1>
-					</a>
+					<div class="logo">
+						<a href="#" accesskey="0" v-bind:title="accessKeyShortcut + '0'">
+							<h1>Paranoid</h1>
+						</a>
+						<a href="paranoid-portable.html" target="_blank" download title="Download the stand-alone paranoid-portable.html - verify the file checksum and run locally by opening the downloaded file in your browser"><em>Portable</em></a>
+					</div>
 					<nav>
 						<ul>
 							<li>
@@ -266,9 +269,58 @@
 					</section>
 				</accounts>
 
-				<section id="chat" class="wrap" v-if="route == ''">
-					<h2>Chat</h2>
-				</section>
+				<chat inline-template v-bind:class="['component', {active:route == ''}]">
+					<section id="chat" class="wrap">
+						<div class="clr">
+							<div class="left">
+								<h2>Chat - {{room.name}}</h2>
+								<div class="scroll-wrap">
+									<ol>
+										<li v-for="message in messages">
+											<span class="from">
+												{{message.username}}
+											</span>
+											<span class="content">
+												{{message.content}}
+											</span>
+										</li>
+									</ol>
+								</div>
+							</div>
+							<div class="right">
+								<div class="top">
+									<h3>Rooms</h3>
+									<div class="scroll-wrap">
+										<ul>
+											<li v-for="r in rooms">
+												<button v-bind:class="['btn btn-slim', {active:r == room}]" v-on:click="handler_room_click(r)">{{r.name}}</button>
+											</li>
+										</ul>
+									</div>
+								</div>
+								<div class="bottom">
+									<h3>Direct Message</h3>
+									<div class="scroll-wrap">
+										<ul>
+											<li v-for="user in users">{{user.username}}</li>
+										</ul>
+									</div>
+								</div>
+							</div>
+						</div>
+						<form ref="frmChat">
+							<div class="message">
+								<div class="input-wrap">
+									<label for="txtMessage" class="seo">Message</label>
+									<input type="text" id="txtMessage" v-model="message" placeholder="Message" required minlength="1" maxlength="255" autocomplete="off"/>
+								</div>
+								<div class="btn-wrap">
+									<button type="submit" class="btn" v-on:click="handler_message_send($event)">Send</button>
+								</div>
+							</div>
+						</form>
+					</section>
+				</chat>
 
 			</main>
 			<footer v-cloak>
