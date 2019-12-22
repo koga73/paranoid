@@ -159,6 +159,10 @@ footer {
 	padding:space(1) 0;
 	height:$footer-height;
 
+	.status {
+		cursor:help;
+	}
+
 	a {
 		float:right;
 		color:$color-secondary-1-4;

@@ -2,9 +2,24 @@
 	Vue.component("accounts", {
 		data:function(){
 			return {
-				accounts:[],
 				accountNew:new Models.Account()
 			};
+		},
+		props:[
+			//Non-sync
+			"ciphers",
+			//Sync
+			"_accounts"
+		],
+		computed:{
+			accounts:{
+                get:function(){
+                    return this._accounts;
+                },
+                set:function(value){
+                    this.$emit(Events.Sync.ACCOUNTS, value);
+                }
+			},
 		},
 		methods:{
 			handler_account_remove:function(evt, account, index){

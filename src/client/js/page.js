@@ -3,6 +3,18 @@
 		el: "#page",
 		data: {
 			route:window.location.hash.substr(1),
+
+			ciphers:[],
+			relays:[],
+			accounts:[
+				new Models.Account({
+					username:"Anonymous"
+				})
+			],
+
+			numConnected:0,
+			totalConnections:0,
+			connectionSummary:""
 		},
 		computed: {
 			accessKeyShortcut:function() {

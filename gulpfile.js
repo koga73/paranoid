@@ -36,6 +36,8 @@ const config = {
 				src + "client/js/resources/strings.js",
 				src + "client/js/helpers/helpers.js",
 				src + "client/js/helpers/regex-patterns.js",
+				src + "client/js/services/storage.js",
+				src + "client/js/events/sync.js",
 				src + "client/js/models/cipher.js",
 				src + "client/js/models/relay.js",
 				src + "client/js/models/account.js",

@@ -38,7 +38,7 @@
 			</header>
 			<main v-cloak>
 
-				<preferences inline-template v-bind:class="['component', {active:route == 'preferences'}]">
+				<preferences inline-template v-bind:_ciphers.sync="ciphers" v-bind:class="['component', {active:route == 'preferences'}]">
 					<section id="preferences">
 						<div class="wrap">
 							<h2>Preferences</h2>
@@ -111,7 +111,7 @@
 					</section>
 				</preferences>
 
-				<relays inline-template v-bind:class="['component', {active:route == 'relays'}]">
+				<relays inline-template v-bind:_relays.sync="relays" v-bind:class="['component', {active:route == 'relays'}]">
 					<section id="relays">
 						<div class="wrap">
 							<h2>Manage Relays</h2>
@@ -137,8 +137,8 @@
 											<tr v-for="(relay, index) in relays">
 												<td>
 													<div class="check-wrap">
-														<input v-bind:id="'chkRelayEnabled_' + relay.name" type="checkbox" v-model="relay.enabled"/>
-														<label v-bind:for="'chkRelayEnabled_' + relay.name">
+														<input v-bind:id="'chkRelayEnabled_' + relay.name" type="checkbox" v-model="relay.enabled" v-bind:disabled="relay.fromServer"/>
+														<label v-bind:for="'chkRelayEnabled_' + relay.name" v-bind:title="relay.fromServer ? 'This relay was added by the server and cannot be disabled' : ''">
 															<span class="seo">{{relay.enabled ? "Currently Enabled" : "Currently Disabled"}}</span>
 														</label>
 													</div>
@@ -146,7 +146,7 @@
 												<td>{{relay.name}}</td>
 												<td>{{relay.address}}</td>
 												<td>
-													<button class="btn" v-on:click="handler_relay_remove($event, relay, index)" title="Remove this relay from your browser">Remove</button>
+													<button class="btn" v-on:click="handler_relay_remove($event, relay, index)" v-bind:disabled="relay.fromServer" v-bind:title="(relay.fromServer) ? 'This relay was added by the server and cannot be removed' : 'Remove this relay from your browser'">Remove</button>
 													<button class="btn" v-on:click="handler_relay_export($event, relay)" title="Export this relay to a downloadable json file">Export</button>
 												</td>
 											</tr>
@@ -192,7 +192,7 @@
 					</section>
 				</relays>
 
-				<accounts inline-template v-bind:class="['component', {active:route == 'accounts'}]">
+				<accounts inline-template v-bind:ciphers="ciphers" v-bind:_accounts.sync="accounts" v-bind:class="['component', {active:route == 'accounts'}]">
 					<section id="accounts">
 						<div class="wrap">
 							<h2>Accounts</h2>
@@ -220,9 +220,9 @@
 										<tbody>
 											<tr v-for="(account, index) in accounts">
 												<td>{{account.username}}</td>
-												<td>{{account.publicKey}}</td>
+												<td>{{(index) ? account.publicKey : "N/A"}}</td>
 												<td>
-													<div class="check-wrap">
+													<div class="check-wrap" v-if="index">
 														<input v-bind:id="'chkAccountShowPrivate_' + account.username" type="checkbox" v-model="account.showPrivate"/>
 														<label v-bind:for="'chkAccountShowPrivate_' + account.username">
 															{{!account.showPrivate ? "Show" : "Hide"}}
@@ -231,11 +231,12 @@
 													<span class="private">
 														{{account.privateKey}}
 													</span>
+													<span v-if="!index">N/A</span>
 												</td>
 												<td>
-													<button class="btn" v-on:click="handler_account_remove($event, account, index)" title="Remove this account from your browser">Remove</button>
-													<button class="btn" v-on:click="handler_account_export($event, account)" title="Export this account to a downloadable json file">Export</button>
-													<button class="btn" v-on:click="handler_account_change($event, account)" title="Generate new keys and register the new public key with the relay">Change keys</button>
+													<button class="btn" v-if="index" v-on:click="handler_account_remove($event, account, index)" title="Remove this account from your browser">Remove</button>
+													<button class="btn" v-if="index" v-on:click="handler_account_export($event, account)" title="Export this account to a downloadable json file">Export</button>
+													<button class="btn" v-if="index" v-on:click="handler_account_change($event, account)" title="Generate new keys and register the new public key with the relay">Change keys</button>
 												</td>
 											</tr>
 											<tr>
@@ -269,7 +270,7 @@
 					</section>
 				</accounts>
 
-				<chat inline-template v-bind:class="['component', {active:route == ''}]">
+				<chat inline-template v-bind:ciphers="ciphers" v-bind:relays="relays" v-bind:accounts="accounts" v-bind:_num-connected.sync="numConnected" v-bind:_total-connections.sync="totalConnections" v-bind:_connection-summary.sync="connectionSummary" v-bind:class="['component', {active:route == ''}]">
 					<section id="chat" class="wrap">
 						<div class="clr">
 							<div class="left">
@@ -330,8 +331,8 @@
 							<div class="right">
 								<div class="select-wrap">
 									<label for="sltUsername">Send as:</label>
-									<select id="sltUsername" v-model="username">
-										<option value="anonymous">Anonymous</option>
+									<select id="sltUsername" v-model="username" v-on:change="handler_username_change">
+										<option v-for="account in accounts" v-bind:value="account.username">{{account.username}}</option>
 									</select>
 								</div>
 							</div>
@@ -342,7 +343,7 @@
 			</main>
 			<footer v-cloak>
 				<div class="wrap">
-					<p>&copy;2019 AJ Savino</p>
+					<p class="status" v-bind:title="connectionSummary">{{numConnected ? "CONNECTED: " + Math.floor(numConnected / totalConnections * 100) + "%" : "DISCONNECTED"}}</p>
 					<!-- TODO: This should download from the relay rather than github to ensure mirrors -->
 					<a href="https://github.com/koga73/paranoid/releases" target="_blank">Download source code</a>
 				</div>
@@ -371,7 +372,14 @@
 						"type":"symmetric"
 					}
 				]
-			}
+			},
+			"relays":[
+				{
+					"enabled":true,
+					"name":"localhost",
+					"address":"ws://localhost:8888"
+				}
+			]
 		};
 	</script>
 

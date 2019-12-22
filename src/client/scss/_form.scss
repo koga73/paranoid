@@ -254,7 +254,7 @@ span.error {
             color:$color-form-bg-disabled;
 
             &:before {
-                border-color:$color-form-bg-disabled;
+				background-color:$color-form-bg-disabled;
             }
 
             .fa {

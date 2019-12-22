@@ -3,11 +3,23 @@
 		data:function(){
 			return {
 				cryptoVisible:false,
-				ciphers:[],
 				cipherNew:new Models.Cipher()
 			};
 		},
+		props:[
+			//Sync
+			"_ciphers"
+		],
 		computed:{
+			ciphers:{
+                get:function(){
+                    return this._ciphers;
+                },
+                set:function(value){
+                    this.$emit(Events.Sync.CIPHERS, value);
+                }
+            },
+
 			cipherTypes:function(){
 				return Object.values(Models.Cipher.TYPES);
 			}
@@ -30,15 +42,15 @@
 		},
 		methods:{
 			addCipher:function(newCipher){
-				var newCipherName = cleanCipherName(newCipher.name);
+				var newName = cleanName(newCipher.name);
 
 				//Does name already exist?
 				var ciphers = this.ciphers;
 				var ciphersLen = ciphers.length;
 				for (var i = 0; i < ciphersLen; i++){
-					var cipherName = cleanCipherName(ciphers[i].name);
-					if (newCipherName == cipherName){ //Already exists
-						console.warn(Resources.Strings.EXISTS_CIPHER.format(cipherName));
+					var name = cleanName(ciphers[i].name);
+					if (newName == name){ //Already exists
+						console.warn(Resources.Strings.EXISTS_CIPHER.format(name));
 						return false;
 					}
 				}
@@ -133,11 +145,11 @@
 		document.body.removeChild(script);
 	}
 
-	function cleanCipherName(cipherName){
-		return Helpers.clean(cipherName);
+	function cleanName(name){
+		return Helpers.clean(name);
 	}
 
-	function buildScriptId(cipherName){
-		return "script_" + cleanCipherName(cipherName);
+	function buildScriptId(name){
+		return "script_" + cleanName(name);
 	}
 })();
