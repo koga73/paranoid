@@ -6,7 +6,8 @@
 				message:"",
 				rooms:[],
 				room:null,
-				users:[]
+				users:[],
+				username:"anonymous"
 			};
 		},
 		mounted:function(){
@@ -39,6 +40,14 @@
 
 			handler_room_click:function(room){
 				this.room = room;
+			},
+
+			handler_newRoom_click:function(){
+				console.log("chat::handler_newRoom_click");
+			},
+
+			handler_newDirect_click:function(){
+				console.log("chat::handler_newDirect_click");
 			}
 		}
 	});

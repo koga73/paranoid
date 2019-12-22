@@ -273,7 +273,7 @@
 					<section id="chat" class="wrap">
 						<div class="clr">
 							<div class="left">
-								<h2>Chat - {{room.name}}</h2>
+								<h2>Chat{{(room) ? " - " + room.name : ""}}</h2>
 								<div class="scroll-wrap">
 									<ol>
 										<li v-for="message in messages">
@@ -289,7 +289,10 @@
 							</div>
 							<div class="right">
 								<div class="top">
-									<h3>Rooms</h3>
+									<div class="clr">
+										<h3 class="left">Rooms</h3>
+										<button class="right btn btn-new" v-on:click="handler_newRoom_click" title="New room">+</button>
+									</div>
 									<div class="scroll-wrap">
 										<ul>
 											<li v-for="r in rooms">
@@ -299,23 +302,37 @@
 									</div>
 								</div>
 								<div class="bottom">
-									<h3>Direct Message</h3>
+									<div class="clr">
+										<h3 class="left">Direct Message</h3>
+										<button class="right btn btn-new" v-on:click="handler_newDirect_click" title="New direct message">+</button>
+									</div>
 									<div class="scroll-wrap">
-										<ul>
+										<p v-if="!users.length">No direct messages yet</p>
+										<ul v-if="users.length">
 											<li v-for="user in users">{{user.username}}</li>
 										</ul>
 									</div>
 								</div>
 							</div>
 						</div>
-						<form ref="frmChat">
-							<div class="message">
-								<div class="input-wrap">
-									<label for="txtMessage" class="seo">Message</label>
-									<input type="text" id="txtMessage" v-model="message" placeholder="Message" required minlength="1" maxlength="255" autocomplete="off"/>
+						<form ref="frmChat" class="clr">
+							<div class="left">
+								<div class="message">
+									<div class="input-wrap">
+										<label for="txtMessage" class="seo">Message</label>
+										<input type="text" id="txtMessage" v-model="message" placeholder="Message" required minlength="1" maxlength="255" autocomplete="off"/>
+									</div>
+									<div class="btn-wrap">
+										<button type="submit" class="btn" v-on:click="handler_message_send($event)">Send</button>
+									</div>
 								</div>
-								<div class="btn-wrap">
-									<button type="submit" class="btn" v-on:click="handler_message_send($event)">Send</button>
+							</div>
+							<div class="right">
+								<div class="select-wrap">
+									<label for="sltUsername">Send as:</label>
+									<select id="sltUsername" v-model="username">
+										<option value="anonymous">Anonymous</option>
+									</select>
 								</div>
 							</div>
 						</form>

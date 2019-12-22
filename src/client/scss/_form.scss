@@ -27,12 +27,20 @@ button {
 		text-align:left;
 		padding:space(1);
 		margin:0;
+		border-radius:0;
 
 		&.active {
 			background-color:$color-secondary-2-1;
 			font-weight:bold;
 			color:$color-white;
 		}
+	}
+
+	&.btn-new {
+		padding:space(1);
+		font-size:1.5em;
+		line-height:0.5em;
+		margin:space(1.5) 0 0 0;
 	}
 }
 .btn-wrap {
@@ -363,6 +371,7 @@ span.error {
         padding:space(1);
 		cursor:pointer;
 		background-color:$color-form-bg;
+		border:1px solid $color-secondary-1-0;
 		color:$color-white;
 
         &[disabled]{

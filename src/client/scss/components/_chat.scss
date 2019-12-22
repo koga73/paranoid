@@ -1,10 +1,67 @@
 #chat {
 	height:100%;
 
-	$message-height:50px;
+	$message-height:52px;
 
-	.clr {
-		height:calc(100% - #{$message-height});
+	& > .clr {
+		&:first-child {
+			height:calc(100% - #{$message-height});
+		}
+
+		& > .left {
+			display:flex;
+			flex-direction:column;
+			width:70%;
+			height:100%;
+
+			@include bp("sm"){
+				width:100%;
+			}
+
+			.scroll-wrap {
+				flex-grow:1;
+			}
+		}
+
+		& > .right {
+			display:flex;
+			flex-direction:column;
+			width:calc(#{30%} - #{space(3)});
+			height:100%;
+			margin-left:space(3);
+
+			@include bp("sm"){
+				display:none;
+			}
+
+			h3 {
+				font-size:toEm(20);
+				line-height:toEm(24, 20);
+			}
+
+			.top, .bottom {
+				display:flex;
+				flex-direction:column;
+				height:50%;
+
+				.scroll-wrap {
+					flex-grow:1;
+					background-color:$color-black;
+					border:1px solid $color-secondary-1-4;
+				}
+
+				p {
+					margin:space(1);
+					color:$color-white-5;
+				}
+
+				li {
+					button {
+
+					}
+				}
+			}
+		}
 	}
 
 	.scroll-wrap {
@@ -13,64 +70,10 @@
 		box-sizing:border-box;
 	}
 
-	.left {
-		display:flex;
-		flex-direction:column;
-		width:70%;
-		height:100%;
-
-		@include bp("sm"){
-			width:100%;
-		}
-
-		.scroll-wrap {
-			flex-grow:1;
-		}
-	}
-
-	.right {
-		display:flex;
-		flex-direction:column;
-		width:calc(#{30%} - #{space(3)});
-		height:100%;
-		margin-left:space(3);
-
-		@include bp("sm"){
-			display:none;
-		}
-
-		h3 {
-			font-size:toEm(20);
-			line-height:toEm(24, 20);
-		}
-
-		.top, .bottom {
-			display:flex;
-			flex-direction:column;
-			height:50%;
-
-			.scroll-wrap {
-				flex-grow:1;
-				background-color:$color-black;
-				border:1px solid $color-secondary-1-4;
-			}
-
-			li {
-				button {
-
-				}
-			}
-		}
-	}
-
 	.message {
 		display:table;
-		width:70%;
+		width:100%;
 		height:$message-height;
-
-		@include bp("sm"){
-			width:100%;
-		}
 
 		& > * {
 			display:table-cell;
@@ -88,6 +91,25 @@
 
 		.btn {
 			margin:space(2) 0 0 space(2);
+		}
+	}
+
+	.select-wrap {
+		display:table;
+		margin-top:space(2);
+
+		label, select {
+			display:table-cell;
+		}
+
+		label {
+			width:1px;
+			white-space:nowrap;
+			padding-right:space(2);
+		}
+
+		select {
+			width:100%;
 		}
 	}
 }
