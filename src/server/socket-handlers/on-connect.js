@@ -1,9 +1,7 @@
+const State = require.main.require("./global/state");
 const Settings = require.main.require("./global/settings");
 const Resources = require.main.require("./resources");
 const Protocol = require.main.require("../shared/js/models/protocol");
-
-//Note that count is intended to be stateful as to assign incrementing ids
-var count = 0;
 
 module.exports = function(evt, context, callback){
 	context = context || null;
@@ -13,12 +11,15 @@ module.exports = function(evt, context, callback){
 	if (Settings.DEBUG){
 		console.info(Resources.Strings.CLIENT_CONNECTED.format(socket.connectionId));
 	}
+	//Auto-increments
+	socket.num = State.getCount();
 
-	//Assign incremental
-	count++;
-	socket.num = count;
+	var defaultRoom = State.getRoom(Resources.Strings.DEFAULT_ROOM);
+	defaultRoom.members.push(socket);
 
-	socket.send(Protocol.create(Protocol.WELCOME));
+	socket.send(Protocol.create(Protocol.WELCOME, {
+		room:Resources.Strings.DEFAULT_ROOM
+	}));
 
 	if (callback){
 		callback(null, {

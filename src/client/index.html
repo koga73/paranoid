@@ -274,7 +274,7 @@
 					<section id="chat" class="wrap">
 						<div class="clr">
 							<div class="left">
-								<h2>Chat{{(room) ? " - " + room.name : ""}}</h2>
+								<h2>Chat{{(contextName) ? " - " + contextName : ""}}</h2>
 								<div class="scroll-wrap">
 									<ol class="messages">
 										<li v-for="message in messages" v-bind:class="['clr', message.type, {self:message.self === true}]">
@@ -282,7 +282,7 @@
 												<span class="seo">From</span>{{message.type == "user" ? message.from : "system"}}
 											</span>
 											<span class="content">
-												{{message.message}}
+												{{message.content}}
 											</span>
 										</li>
 									</ol>
@@ -296,8 +296,8 @@
 									</div>
 									<div class="scroll-wrap">
 										<ul>
-											<li v-for="r in rooms">
-												<button v-bind:class="['btn btn-slim', {active:r == room}]" v-on:click="handler_room_click(r)">{{r.name}}</button>
+											<li v-for="room in rooms">
+												<button v-bind:class="['btn btn-slim', {active:isRoomActive(room)}]" v-on:click="handler_room_click(room)">{{room.name}}</button>
 											</li>
 										</ul>
 									</div>

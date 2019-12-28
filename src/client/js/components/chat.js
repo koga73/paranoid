@@ -4,14 +4,13 @@
 	Vue.component("chat", {
 		data:function(){
 			return {
+				context:null,
+
 				messages:[],
 				message:"",
 
 				rooms:[],
-				room:null,
-
 				users:[],
-				user:null,
 
 				username:"",
 				account:null,
@@ -88,17 +87,18 @@
 					this.$emit(Events.Sync.TOTAL_CONNECTIONS, this.totalConnections);
 					this.$emit(Events.Sync.CONNECTION_SUMMARY, this.connectionSummary);
 				}
+			},
+
+			contextName:function(){
+				if (!this.context){
+					return null;
+				}
+				return this.context.split(':')[1];
 			}
 		},
 		mounted:function(){
 			this.account = this.accounts[0];
 			this.username = this.account.username;
-
-			this.rooms.push({name:"public"});
-			this.room = this.rooms[0];
-			for (var i = 0; i < 100; i++){
-				this.rooms.push({name:"test-" + i});
-			}
 		},
 		methods:{
 			connect:function(relay){
@@ -125,11 +125,27 @@
 				console.log("chat::handler_socket_message", evt);
 
 				var data = JSON.parse(evt.data);
+				switch (data.code){
+					case Protocol.WELCOME.code:
+						if (data.room){
+							this.rooms.push({
+								name:data.room
+							});
+							this.context = "room:" + data.room;
+						}
+						break;
+				}
+
 				this.messages.push(data);
 			},
 
 			handler_message_send:function(evt){
 				evt.preventDefault();
+
+				//TODO: Show message?
+				if (!this.context){
+					return false;
+				}
 
 				//Validate form
                 var form = this.$refs["frmChat"];
@@ -142,14 +158,14 @@
                     return false;
 				}
 
-				send(this.username, this.message);
+				send(this.username, this.context, this.message);
 				this.message = "";
 
 				return false;
 			},
 
 			handler_room_click:function(room){
-				this.room = room;
+				this.context = "room:" + room.name;
 			},
 
 			handler_newRoom_click:function(){
@@ -162,6 +178,13 @@
 
 			handler_username_change:function(){
 				console.log("chat::handler_username_change");
+			},
+
+			isRoomActive:function(room){
+				if (!this.context){
+					return false;
+				}
+				return this.context.toLowerCase() == ("room:" + room.name).toLowerCase();
 			}
 		},
 		watch:{
@@ -212,10 +235,11 @@
 		return socket && socket.readyState == WebSocket.OPEN;
 	}
 
-	function send(from, message){
+	function send(from, to, content){
 		var data = Protocol.create(Protocol.MSG, {
 			from:from, //This is verified on the relay
-			message:message
+			to:to,
+			content:content
 		});
 
 		var socketsLen = sockets.length;

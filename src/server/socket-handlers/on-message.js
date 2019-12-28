@@ -1,3 +1,4 @@
+const State = require.main.require("./global/state");
 const ErrorHandler = require.main.require("./global/error-handler");
 const Settings = require.main.require("./global/settings");
 const Resources = require.main.require("./resources");
@@ -28,39 +29,12 @@ module.exports = function(evt, context, callback){
 			throw new Error(Resources.Strings.ERROR_NO_DATA);
 		}
 
-		var message = data.message || null;
-		if (!message){
-			throw new Error(Resources.Strings.ERROR_NO_MESSAGE);
-		}
-		if (message.length > Settings.MAX_MESSAGE_SIZE){
-			throw new Error(Resources.Strings.ERROR_EXCEEDED_MESSAGE);
-		}
-
-		var from = data.from || null;
-		if (!from){
-			throw new Error(Resources.Strings.ERROR_NO_FROM);
-		}
-		if (from.length > Settings.MAX_USERNAME_SIZE){
-			throw new Error(Resources.Strings.ERROR_EXCEEDED_USERNAME);
-		}
-		const ANONYMOUS = Resources.Strings.ANONYMOUS;
-		if (from.toLowerCase() == ANONYMOUS.toLowerCase()){
-			from = `${ANONYMOUS}-{0}`.format(socket.num);
-		} else {
-			//TODO
-		}
-
-		var to = data.to || null;
-		if (to){
-			if (from.length > Settings.MAX_USERNAME_SIZE){
-				throw new Error(Resources.Strings.ERROR_EXCEEDED_USERNAME);
-			}
-			//TODO
-		} else {
-			broadcast(socket, {
-				from:from,
-				message:message
-			});
+		switch (data.code){
+			case Protocol.MSG.code:
+				caseMessage(socket, data);
+				break;
+			default:
+				throw new Error(Resources.Strings.ERROR_INVALID_CODE);
 		}
 
 		if (callback){
@@ -81,28 +55,67 @@ module.exports = function(evt, context, callback){
 	}
 };
 
-var App = null;
-function broadcast(fromSocket, data){
-	//TODO: Channels
-
-	//This has to be here, if up top it returns an empty object
-	if (!App){
-		App = require.main.require("./app");
+function caseMessage(socket, data){
+	var content = data.content || null;
+	if (!content){
+		throw new Error(Resources.Strings.ERROR_NO_CONTENT);
+	}
+	if (content.length > Settings.MAX_CONTENT_SIZE){
+		throw new Error(Resources.Strings.ERROR_CONTENT_MESSAGE);
 	}
 
-	var dataObj = Protocol.create(Protocol.MSG, data);
+	var from = data.from || null;
+	if (!from){
+		throw new Error(Resources.Strings.ERROR_NO_FROM);
+	}
+	if (from.length > Settings.MAX_USERNAME_SIZE){
+		throw new Error(Resources.Strings.ERROR_EXCEEDED_USERNAME);
+	}
+	const ANONYMOUS = Resources.Strings.ANONYMOUS;
+	if (from.toLowerCase() == ANONYMOUS.toLowerCase()){
+		from = `${ANONYMOUS}-{0}`.format(socket.num);
+	} else {
+		//TODO
+	}
 
-	var clients = App.getClients();
-	clients.forEach((client) => {
-		if (fromSocket.connectionId == client.connectionId){
-			client.send(Protocol.create(Protocol.MSG, Object.assign({self:true}, data)));
-		} else {
-			client.send(dataObj);
-		}
-	});
+	var to = data.to || null;
+	if (!to){
+		throw new Error(Resources.Strings.ERROR_NO_TO);
+	}
+	if (to.length > Settings.MAX_USERNAME_SIZE){
+		throw new Error(Resources.Strings.ERROR_EXCEEDED_USERNAME);
+	}
+
+	if (Resources.Regex.TO_ROOM.test(to)){
+		var roomName = Resources.Regex.TO_ROOM.exec(to)[1];
+
+		broadcast(socket, roomName, {
+			from:from,
+			to:`room:${roomName}`,
+			content:content
+		});
+		return;
+	}
+
+	throw new Error(Resources.Strings.ERROR_INVALID_TO);
 }
 
 function handle_message_error(socket, err, debugObj){
 	socket.terminate();
 	ErrorHandler.handler_invalid_message(err, debugObj);
+}
+
+function broadcast(fromSocket, roomName, data){
+	//TODO: Channels
+
+	var dataObj = Protocol.create(Protocol.MSG, data);
+
+	var room = State.getRoom(roomName);
+	room.members.forEach((socket) => {
+		if (fromSocket.connectionId == socket.connectionId){
+			socket.send(Protocol.create(Protocol.MSG, Object.assign({self:true}, data)));
+		} else {
+			socket.send(dataObj);
+		}
+	});
 }

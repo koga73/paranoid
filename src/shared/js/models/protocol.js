@@ -16,7 +16,8 @@
 		WELCOME:{
 			type:_TYPE.SYSTEM,
 			code:100,
-			message:Strings.PROTOCOL_WELCOME || null
+			content:Strings.PROTOCOL_WELCOME || null,
+			room:null
 		},
 
 		//User
@@ -25,7 +26,7 @@
 			code:200,
 			from:null,
 			to:null,
-			message:null,
+			content:null,
 			self:false
 		},
 

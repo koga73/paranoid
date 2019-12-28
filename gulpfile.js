@@ -30,6 +30,7 @@ const config = {
 		files:{
 			input:[
 				src + "shared/js/polyfill/string.js",
+				src + "client/js/polyfill/random.js",
 				src + "client/js/_lib/promise-polyfill.js",
 				src + "client/js/_lib/axios.js",
 				src + "client/js/_lib/oop.js",

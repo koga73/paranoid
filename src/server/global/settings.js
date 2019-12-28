@@ -7,7 +7,7 @@ module.exports = {
 
 	MAX_BODY_SIZE:512,
 	MAX_USERNAME_SIZE:32,
-	MAX_MESSAGE_SIZE:255
+	MAX_CONTENT_SIZE:255
 };
 
 function getArg(key) {
