@@ -1,10 +1,13 @@
 module.exports = {
 	NAME:"Paranoid",
 	VERSION:"0.0.1",
-	
+
 	DEBUG:getArg("--debug") !== null,
 	SERVER_PORT:getArg("--port") || getArg("-p") || process.env.PORT || 8888, //Used for both WebServer and SocketServer
-	PING_INTERVAL:10000 //Number of milliseconds to ping clients to ensure active connections
+
+	MAX_BODY_SIZE:512,
+	MAX_USERNAME_SIZE:32,
+	MAX_MESSAGE_SIZE:255
 };
 
 function getArg(key) {

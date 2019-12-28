@@ -33,3 +33,6 @@
 ## Run
 - ```npm run start```
 - https://localhost:8888
+
+### Debug
+- ```npm run start -- --debug```

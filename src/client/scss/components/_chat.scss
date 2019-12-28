@@ -46,7 +46,6 @@
 
 				.scroll-wrap {
 					flex-grow:1;
-					background-color:$color-black;
 					border:1px solid $color-secondary-1-4;
 				}
 
@@ -65,7 +64,6 @@
 	}
 
 	.scroll-wrap {
-		background-color:$color-form-bg;
 		border:1px solid $color-secondary-1-0;
 		box-sizing:border-box;
 	}
@@ -91,6 +89,10 @@
 
 		.btn {
 			margin:space(2) 0 0 space(2);
+			position:relative;
+			top:2px;
+			padding:space(1.125) space(2);
+			line-height:14px;
 		}
 	}
 
@@ -110,6 +112,52 @@
 
 		select {
 			width:100%;
+		}
+	}
+
+	ol.messages {
+		width:100%;
+		box-sizing:border-box;
+		padding:0 space(1);
+
+		li {
+			width:100%;
+			margin:space(1) 0;
+
+			.from, .content {
+				float:left;
+				clear:both;
+				background-color:$color-secondary-2-4;
+			}
+
+			.from {
+				padding:space(0.5);
+				font-size:toEm(12);
+			}
+
+			.content {
+				padding:space(1);
+			}
+
+			&.system {
+				color:$color-complement-1;
+
+				.from {
+					display:none;
+				}
+				.content {
+					background-color:transparent;
+				}
+			}
+
+			&.self {
+				text-align:right;
+
+				.from, .content {
+					float:right;
+					background-color:$color-primary-4;
+				}
+			}
 		}
 	}
 }

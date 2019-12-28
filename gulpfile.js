@@ -29,7 +29,7 @@ const config = {
 		name:"js",
 		files:{
 			input:[
-				src + "client/js/polyfill/string.js",
+				src + "shared/js/polyfill/string.js",
 				src + "client/js/_lib/promise-polyfill.js",
 				src + "client/js/_lib/axios.js",
 				src + "client/js/_lib/oop.js",
@@ -41,6 +41,7 @@ const config = {
 				src + "client/js/models/cipher.js",
 				src + "client/js/models/relay.js",
 				src + "client/js/models/account.js",
+				src + "shared/js/models/protocol.js",
 				src + "client/js/components/preferences.js",
 				src + "client/js/components/relays.js",
 				src + "client/js/components/accounts.js",

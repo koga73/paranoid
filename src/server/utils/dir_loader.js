@@ -12,13 +12,14 @@ module.exports = {
 						//Remove js
 						//Example: test.js = test
 						var moduleName = file.replace(/\.js$/i, '');
-						
+
 						//Make camel case
 						//Example: test_test = testTest
-						(moduleName.match(/_[a-z0-9]/g) || []).forEach((match) => {
-							moduleName = moduleName.replace(match, match.toUpperCase().replace('_', ''));
+						//Example: test-test = testTest
+						(moduleName.match(/[_-][a-z0-9]/g) || []).forEach((match) => {
+							moduleName = moduleName.replace(match, match.toUpperCase().replace(/[_-]/, ''));
 						});
-						
+
 						//Make first letter uppercase
 						//Example: test = Test
 						moduleName = moduleName.substr(0, 1).toUpperCase() + moduleName.substr(1, moduleName.length - 1);

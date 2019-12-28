@@ -276,13 +276,13 @@
 							<div class="left">
 								<h2>Chat{{(room) ? " - " + room.name : ""}}</h2>
 								<div class="scroll-wrap">
-									<ol>
-										<li v-for="message in messages">
+									<ol class="messages">
+										<li v-for="message in messages" v-bind:class="['clr', message.type, {self:message.self === true}]">
 											<span class="from">
-												{{message.username}}
+												<span class="seo">From</span>{{message.type == "user" ? message.from : "system"}}
 											</span>
 											<span class="content">
-												{{message.content}}
+												{{message.message}}
 											</span>
 										</li>
 									</ol>

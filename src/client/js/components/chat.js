@@ -123,6 +123,9 @@
 
 			handler_socket_message:function(evt){
 				console.log("chat::handler_socket_message", evt);
+
+				var data = JSON.parse(evt.data);
+				this.messages.push(data);
 			},
 
 			handler_message_send:function(evt){
@@ -139,7 +142,7 @@
                     return false;
 				}
 
-				//TODO
+				send(this.username, this.message);
 				this.message = "";
 
 				return false;
@@ -207,5 +210,20 @@
 
 	function isConnected(socket){
 		return socket && socket.readyState == WebSocket.OPEN;
+	}
+
+	function send(from, message){
+		var data = Protocol.create(Protocol.MSG, {
+			from:from, //This is verified on the relay
+			message:message
+		});
+
+		var socketsLen = sockets.length;
+		for (var i = 0; i < socketsLen; i++){
+			var socket = sockets[i];
+			if (isConnected(socket)){
+				socket.send(data);
+			}
+		}
 	}
 })();

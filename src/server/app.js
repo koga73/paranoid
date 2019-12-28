@@ -1,19 +1,23 @@
 #!/usr/bin/env node
 
+require("../shared/js/polyfill");
+
 const Express = require("express");
 const Http = require("http");
 const WebSocketServer = require("ws").Server;
 const BodyParser = require("body-parser");
+const UUID = require("node-uuid");
 
-const ErrorHandler = require("./global/error_handler");
+const ErrorHandler = require("./global/error-handler");
 const Settings = require("./global/settings");
 const Log = require("./utils/log");
+const Resources = require("./resources");
+const SocketHandlers = require("./socket-handlers");
 
-(() => {
+module.exports = (function(){
 	var _vars = {
 		_server:null,
-		_socketServer:null,
-		_pingInterval:0
+		_socketServer:null
 	};
 
 	var _methods = {
@@ -21,6 +25,9 @@ const Log = require("./utils/log");
 			process.on('uncaughtException', ErrorHandler.handler_uncaught_exception);
 			process.stdin.on("data", _methods._handler_stdin_data);
 
+			if (Settings.DEBUG){
+				console.info("DEBUG ENABLED");
+			}
 			_methods._displayCommands();
 			_methods._initServer();
 		},
@@ -52,10 +59,8 @@ const Log = require("./utils/log");
 
 			//Listen
 			server.listen(Settings.SERVER_PORT, () => {
-				console.log("Listening on", `http://localhost:${Settings.SERVER_PORT}`);
+				console.log(Resources.Strings.LISTENING.format(Settings.SERVER_PORT));
 			});
-
-			_vars._pingInterval = setInterval(_methods._handler_ping_interval, Settings.PING_INTERVAL);
 		},
 
 		destroy:function(){
@@ -63,16 +68,10 @@ const Log = require("./utils/log");
 				_vars._socketServer.close();
 				_vars._socketServer = null;
 			}
-
 			if (_vars._server){
 				_vars._server.close();
 				_vars._server = null;
 			}
-
-			if (_vars._pingInterval){
-				clearInterval(_vars._pingInterval);
-				_vars._pingInterval = 0;
-			};
 
 			process.stdin.removeListener("data", _methods._handler_stdin_data);
 			process.removeListener('uncaughtException', ErrorHandler.handler_uncaught_exception);
@@ -83,23 +82,40 @@ const Log = require("./utils/log");
 			_methods.init();
 		},
 
-		_handler_socketServer_connection:function(socket){
-			socket.isAlive = true;
-			socket.on("pong", _methods._handler_socket_pong);
+		getClients:function(){
+			return Array.from(_vars._socketServer.clients);
 		},
 
-		_handler_ping_interval:function(){
-			_vars._socketServer.clients.forEach((socket) => {
-				if (!socket.isAlive){
-					return socket.terminate();
-				}
-				socket.isAlive = false; //Set to not alive and wait for pong to revive
-				socket.ping("ping", false, true);
+		_handler_socketServer_connection:function(socket){
+			socket.connectionId = UUID.v4();
+			socket.on("message", _methods._handler_socket_message);
+			socket.on("close", _methods._handler_socket_close);
+
+			//Designed to mimic Amazon WebSocket API Lambda function for easy porting
+			SocketHandlers.OnConnect({
+				requestContext:socket
 			});
 		},
 
-		_handler_socket_pong:function(){
-			this.isAlive = true;
+		_handler_socket_message:function(message){
+			var socket = this;
+
+			//Designed to mimic Amazon WebSocket API Lambda function for easy porting
+			SocketHandlers.OnMessage({
+				requestContext:socket,
+				body:`{"message":${message}}`
+			});
+		},
+
+		_handler_socket_close:function(){
+			var socket = this;
+			socket.removeListener("message", _methods._handler_socket_message);
+			socket.removeListener("close", _methods._handler_socket_close);
+
+			//Designed to mimic Amazon WebSocket API Lambda function for easy porting
+			SocketHandlers.OnDisconnect({
+				requestContext:socket
+			});
 		},
 
 		//Console input
@@ -119,6 +135,9 @@ const Log = require("./utils/log");
 					console.clear();
 					_methods._displayCommands();
 					break;
+				case "connections":
+					console.log(Resources.Strings.ACTIVE_CONNECTIONS.format(_methods.getClients().length));
+					break;
 				case "?":
 				default:
 					_methods._displayCommands();
@@ -130,9 +149,17 @@ const Log = require("./utils/log");
 			console.log();
 			console.log(Log.COLORS.BG.MAGENTA, Settings.NAME + " " + Settings.VERSION, Log.COLORS.SYSTEM.RESET);
 			console.log(Log.COLORS.BG.BLUE, "Commands:", Log.COLORS.SYSTEM.RESET, "[ end | exit ] [ reset ] [ cls | clear ]");
+			console.log("          ", Log.COLORS.SYSTEM.RESET, "[ connections ]");
 			console.log();
 			console.log();
 		}
 	};
 	_methods.init();
+
+	return {
+		init:_methods.init,
+		destroy:_methods.destroy,
+		reset:_methods.reset,
+		getClients:_methods.getClients
+	};
 })();
