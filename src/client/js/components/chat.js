@@ -9,13 +9,13 @@
 				messages:[],
 				message:"",
 
-				rooms:[],
 				users:[],
 
 				username:"",
 				account:null,
 
-				socketChangeHackVal:0
+				socketChangeHackVal:0,
+				roomChangeHackVal:0
 			};
 		},
 		props:[
@@ -57,7 +57,7 @@
 				if (connected.length){
 					summary += Resources.Strings.CONNECTED + "\n";
 					summary += connected.reduce(function(summary, socket){
-						return "  " + summary + socket.name + ' - "' + socket.url + '"\n';
+						return "  " + summary + socket.metadata.name + ' - "' + socket.url + '"\n';
 					}, "");
 					summary += "\n";
 				}
@@ -68,7 +68,7 @@
 				if (disconnected.length){
 					summary += Resources.Strings.DISCONNECTED + "\n";
 					summary += disconnected.reduce(function(summary, socket){
-						return "  " + summary + socket.name + ' - "' + socket.url + '"\n';
+						return "  " + summary + socket.metadata.name + ' - "' + socket.url + '"\n';
 					}, "");
 					summary += "\n";
 				}
@@ -76,7 +76,7 @@
 				return summary.trim();
 			},
 
-			//We don't want observers on the sockets themselves so instead we use this hack value to indicate changes
+			//We don't want observers on the sockets so instead we use this hack value to indicate changes
 			socketChangeHack:{
 				get:function(){
 					return this.socketChangeHackVal;
@@ -94,6 +94,31 @@
 					return null;
 				}
 				return this.context.split(':')[1];
+			},
+
+			//We don't want observers on the rooms so instead we use this hack value to indicate changes
+			roomChangeHack:{
+				get:function(){
+					return this.roomChangeHackVal;
+				},
+				set:function(){
+					this.roomChangeHackVal = new Date().getTime();
+				}
+			},
+
+			rooms:function(){
+				this.roomChangeHack;
+
+				//Filter duplicates
+				return Models.Room.rooms.reduce(function(roomNames, room){
+					if (roomNames.indexOf(room.name) == -1){
+						roomNames.push({
+							name:room.name
+							//TODO: Member count
+						});
+					}
+					return roomNames;
+				}, []);
 			}
 		},
 		mounted:function(){
@@ -103,7 +128,9 @@
 		methods:{
 			connect:function(relay){
 				var socket = new WebSocket(relay.address);
-				socket.name = relay.name;
+				socket.metadata = new Models.SocketMetadata({
+					name:relay.name
+				})
 				socket.onopen = this.handler_socket_open;
 				socket.onclose = this.handler_socket_close;
 				socket.onmessage = this.handler_socket_message;
@@ -124,15 +151,35 @@
 			handler_socket_message:function(evt){
 				console.log("chat::handler_socket_message", evt);
 
-				var data = JSON.parse(evt.data);
+				var socket = evt.srcElement;
+				var seqNum = socket.metadata.seqFromRelay;
+				socket.metadata.seqFromRelay++;
+
+				var data;
+				if (seqNum){ //First message is unencrypted... for now
+					//TODO: Decrypt
+				}
+				data = JSON.parse(evt.data);
+
 				switch (data.code){
+
 					case Protocol.WELCOME.code:
-						if (data.room){
-							this.rooms.push({
-								name:data.room
+						socket.metadata.iv = Helpers.Crypto.base64ToArrayBuffer(data.iv);
+						//TODO: Move algorithm so not hard-coded
+						crypto.subtle.importKey("raw", Helpers.Crypto.base64ToArrayBuffer(data.key), "AES-GCM", false, ["encrypt", "decrypt"])
+							.then(function(secretKey){
+								socket.metadata.sessionKey = secretKey;
 							});
-							this.context = "room:" + data.room;
-						}
+						break;
+
+					case Protocol.ROOM.code:
+						Models.Room.rooms.push(new Models.Room({
+							name:data.name,
+							relayName:socket.metadata.name,
+							members:data.members
+						}));
+						this.roomChangeHack=1;
+						this.context = "room:" + data.name;
 						break;
 				}
 
@@ -210,6 +257,7 @@
 	});
 
 	function disconnect(socket){
+		socket.metadata = null;
 		socket.onopen = null;
 		socket.onmessage = null;
 		socket.close();
@@ -224,7 +272,7 @@
 		var socketsLen = sockets.length;
 		for (var i = 0; i < socketsLen; i++){
 			var socket = sockets[i];
-			if (socket.name == name){
+			if (socket.metadata.name == name){
 				return socket;
 			}
 		}
@@ -246,7 +294,7 @@
 		for (var i = 0; i < socketsLen; i++){
 			var socket = sockets[i];
 			if (isConnected(socket)){
-				socket.send(data);
+				Helpers.send(socket, data);
 			}
 		}
 	}

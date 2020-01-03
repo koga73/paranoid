@@ -17,7 +17,14 @@
 			type:_TYPE.SYSTEM,
 			code:100,
 			content:Strings.PROTOCOL_WELCOME || null,
-			room:null
+			key:null //Encrypt all future communication using this key
+		},
+		ROOM:{
+			type:_TYPE.SYSTEM,
+			code:110,
+			content:Strings.PROTOCOL_ROOM || null,
+			name:null,
+			members:0
 		},
 
 		//User
@@ -48,7 +55,26 @@
 				}
 			}
 
-			return JSON.stringify(tmp);
+			var jsonStr = JSON.stringify(tmp);
+
+			//Add random value at beginning and end of object to make sequences less predictable
+			var rnds = [];
+			do {
+				var digits = (Math.random() * 4 >> 0) + 1; //Up to 4 digits in length
+				var rnd = Math.random().toFixed(digits) * Math.pow(10, digits) >> 0;
+				if (rnds.indexOf(rnd) == -1){ //No duplicates
+					rnds.push(rnd);
+				}
+			} while (rnds.length < 4);
+			//Chance it won't get prepended
+			if (Math.random() < .73){
+				jsonStr = jsonStr.replace(/^{/, '{"' + rnds[0] + '":' + rnds[2] + ',');
+			}
+			//Chance it won't get appended
+			if (Math.random() < .37){
+				jsonStr = jsonStr.replace(/}$/, ',"' + rnds[1] + '":' + rnds[3] + '}');
+			}
+			return jsonStr;
 		}
 	});
 })();

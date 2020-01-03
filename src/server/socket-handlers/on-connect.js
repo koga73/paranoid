@@ -1,7 +1,9 @@
 const State = require.main.require("./global/state");
 const Settings = require.main.require("./global/settings");
 const Resources = require.main.require("./resources");
+const Send = require.main.require("./socket-handlers/send");
 const Protocol = require.main.require("../shared/js/models/protocol");
+const Models = require.main.require("./models");
 
 module.exports = function(evt, context, callback){
 	context = context || null;
@@ -11,15 +13,15 @@ module.exports = function(evt, context, callback){
 	if (Settings.DEBUG){
 		console.info(Resources.Strings.CLIENT_CONNECTED.format(socket.connectionId));
 	}
-	//Auto-increments
-	socket.num = State.getCount();
 
-	var defaultRoom = State.getRoom(Resources.Strings.DEFAULT_ROOM);
-	defaultRoom.members.push(socket);
+	var metadata = new Models.SocketMetadata({
+		id:socket.connectionId,
+		num:State.getCount() //Auto-increments
+	});
+	State.addSocketMetadata(metadata);
 
-	socket.send(Protocol.create(Protocol.WELCOME, {
-		room:Resources.Strings.DEFAULT_ROOM
-	}));
+	welcome(socket, metadata);
+	addToRoom(socket, metadata);
 
 	if (callback){
 		callback(null, {
@@ -27,3 +29,23 @@ module.exports = function(evt, context, callback){
 		});
 	}
 };
+
+function welcome(socket, metadata){
+	Send(socket, Protocol.create(Protocol.WELCOME, {
+		iv:metadata.iv.toString("base64"),
+		//Note: Currently MITM has to be active during connection to get this key
+		//TODO: Future use ECDH to generate and exchange key securely
+		key:metadata.key.toString("base64")
+	}), metadata, false);
+}
+
+function addToRoom(socket, metadata){
+	var defaultRoom = State.getRoom(Resources.Strings.DEFAULT_ROOM);
+	defaultRoom.members.push(socket);
+
+	Send(socket, Protocol.create(Protocol.ROOM, {
+		content:Protocol.ROOM.content.format(defaultRoom.name),
+		name:defaultRoom.name,
+		members:defaultRoom.members.length
+	}), metadata);
+}

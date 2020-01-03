@@ -6,6 +6,6 @@
 	  return;
 
 	Math.random = function() {
-	  return rng.getRandomValues(new Uint32Array(1))[0] / 4294967296;
+	  return rng.getRandomValues(new Uint32Array(1))[0] / 0xFFFFFFFF;
 	};
   })();

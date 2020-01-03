@@ -11,7 +11,9 @@ module.exports = {
 	DEFAULT_ROOM:"Public",
 
 	//Errors
+	ERROR_EXISTS_SOCKET_ID:"socket id {0} already exists",
 	ERROR_INVALID_JSON:"invalid json",
+	ERROR_DECRYPT:"could not decrypt",
 	ERROR_NO_DATA:"no data",
 	ERROR_EXCEEDED_BODY:"exceeded body size",
 	ERROR_NO_CONTENT:"no content",
@@ -21,7 +23,9 @@ module.exports = {
 	ERROR_EXCEEDED_USERNAME:"exceeded username size",
 	ERROR_INVALID_CODE:"invalid code",
 	ERROR_INVALID_TO:"invalid to",
+	ERROR_INVALID_ARRAY_LENGTH:"invalid array length",
 
 	//Protocol strings
-	PROTOCOL_WELCOME:`Connected to ${Settings.NAME} ${Settings.VERSION}`
+	PROTOCOL_WELCOME:`Connected to ${Settings.NAME} ${Settings.VERSION}`,
+	PROTOCOL_ROOM:`Joined room {0}`
 };

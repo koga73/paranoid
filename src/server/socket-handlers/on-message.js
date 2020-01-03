@@ -1,37 +1,68 @@
-const State = require.main.require("./global/state");
+const crypto = require("crypto");
+
 const ErrorHandler = require.main.require("./global/error-handler");
 const Settings = require.main.require("./global/settings");
 const Resources = require.main.require("./resources");
+const Send = require.main.require("./socket-handlers/send");
 const Protocol = require.main.require("../shared/js/models/protocol");
+const State = require.main.require("./global/state");
+const CryptoHelper = require.main.require("../shared/js/helpers/crypto");
 
-module.exports = function(evt, context, callback){
+module.exports = async function(evt, context, callback){
 	context = context || null;
 	callback = callback || null;
 
 	var socket = evt.requestContext;
+	var metadata = State.getSocketMetadata(socket.connectionId);
+	metadata.seqFromClient++;
+	var seqNum = metadata.seqFromClient;
 
 	//Lots of error checks, if anything goes wrong terminate the connection!
-	var debugObj = null;
+	var debugObj = evt.body;
 	try {
 		if (evt.body > Settings.MAX_BODY_SIZE){
-			debugObj = evt.body;
 			throw new Error(Resources.Strings.ERROR_EXCEEDED_BODY);
 		}
 
 		var data = null;
+		//Parse JSON
 		try {
 			data = JSON.parse(evt.body).message;
 			debugObj = data;
 		} catch (err){
 			throw new Error(Resources.Strings.ERROR_INVALID_JSON);
 		}
-		if (!data){
-			throw new Error(Resources.Strings.ERROR_NO_DATA);
+
+		//Decrypt
+		try {
+			var tagLen = 16; //Bytes
+			var encrypted = Buffer.from(data, "base64");
+			var iv = Buffer.from(CryptoHelper.computeIV(metadata.iv, CryptoHelper.IV_FIXED_CLIENT, seqNum));
+
+			var decipher = crypto.createDecipheriv("aes-256-gcm", metadata.key, iv);
+			decipher.setAuthTag(encrypted.slice(-tagLen));
+			data = decipher.update(encrypted.slice(0, encrypted.length - tagLen), "binary", "utf8") + decipher.final("utf8");
+
+			debugObj = data;
+		} catch (err){
+			if (Settings.DEBUG){
+				throw err;
+			} else {
+				throw new Error(Resources.Strings.ERROR_DECRYPT);
+			}
+		}
+
+		//Parse JSON
+		try {
+			data = JSON.parse(data);
+			debugObj = data;
+		} catch (err){
+			throw new Error(Resources.Strings.ERROR_INVALID_JSON);
 		}
 
 		switch (data.code){
 			case Protocol.MSG.code:
-				caseMessage(socket, data);
+				caseMessage(socket, metadata, data);
 				break;
 			default:
 				throw new Error(Resources.Strings.ERROR_INVALID_CODE);
@@ -55,7 +86,7 @@ module.exports = function(evt, context, callback){
 	}
 };
 
-function caseMessage(socket, data){
+function caseMessage(socket, metadata, data){
 	var content = data.content || null;
 	if (!content){
 		throw new Error(Resources.Strings.ERROR_NO_CONTENT);
@@ -73,7 +104,7 @@ function caseMessage(socket, data){
 	}
 	const ANONYMOUS = Resources.Strings.ANONYMOUS;
 	if (from.toLowerCase() == ANONYMOUS.toLowerCase()){
-		from = `${ANONYMOUS}-{0}`.format(socket.num);
+		from = `${ANONYMOUS}-{0}`.format(metadata.num);
 	} else {
 		//TODO
 	}
@@ -89,7 +120,7 @@ function caseMessage(socket, data){
 	if (Resources.Regex.TO_ROOM.test(to)){
 		var roomName = Resources.Regex.TO_ROOM.exec(to)[1];
 
-		broadcast(socket, roomName, {
+		broadcast(socket, metadata, roomName, {
 			from:from,
 			to:`room:${roomName}`,
 			content:content
@@ -105,7 +136,7 @@ function handle_message_error(socket, err, debugObj){
 	ErrorHandler.handler_invalid_message(err, debugObj);
 }
 
-function broadcast(fromSocket, roomName, data){
+function broadcast(fromSocket, metadata, roomName, data){
 	//TODO: Channels
 
 	var dataObj = Protocol.create(Protocol.MSG, data);
@@ -113,9 +144,9 @@ function broadcast(fromSocket, roomName, data){
 	var room = State.getRoom(roomName);
 	room.members.forEach((socket) => {
 		if (fromSocket.connectionId == socket.connectionId){
-			socket.send(Protocol.create(Protocol.MSG, Object.assign({self:true}, data)));
+			Send(socket, Protocol.create(Protocol.MSG, Object.assign({self:true}, data)), metadata);
 		} else {
-			socket.send(dataObj);
+			Send(socket, dataObj, metadata);
 		}
 	});
 }

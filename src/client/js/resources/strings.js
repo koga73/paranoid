@@ -7,7 +7,9 @@
 			EXISTS_RELAY:"Relay {0} already exists",
 			LOADED_CIPHER:"Cipher {0} loaded",
 			CONNECTED:"Connected:",
-			DISCONNECTED:"Disconnected:"
+			DISCONNECTED:"Disconnected:",
+
+			ERROR_INVALID_ARRAY_LENGTH:"invalid array length"
 		}
 
     }));

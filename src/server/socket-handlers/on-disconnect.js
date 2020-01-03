@@ -1,5 +1,6 @@
 const Settings = require.main.require("./global/settings");
 const Resources = require.main.require("./resources");
+const State = require.main.require("./global/state");
 
 module.exports = function(evt, context, callback){
 	context = context || null;
@@ -9,6 +10,8 @@ module.exports = function(evt, context, callback){
 	if (Settings.DEBUG){
 		console.info(Resources.Strings.CLIENT_DISCONNECTED.format(socket.connectionId));
 	}
+
+	State.removeSocketMetadata(socket.connectionId);
 
 	if (callback){
 		callback(null, {

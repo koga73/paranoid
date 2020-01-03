@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 
+require("./polyfill/base64.js");
+require("./polyfill/random.js");
 require("../shared/js/polyfill");
 
 const Express = require("express");
@@ -61,6 +63,8 @@ module.exports = (function(){
 			server.listen(Settings.SERVER_PORT, () => {
 				console.log(Resources.Strings.LISTENING.format(Settings.SERVER_PORT));
 			});
+
+			//TODO: Host check!
 		},
 
 		destroy:function(){
