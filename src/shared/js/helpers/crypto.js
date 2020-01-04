@@ -6,6 +6,8 @@
 	var cryp = typeof crypto !== typeof undefined ? crypto : require("crypto");
 
 	var obj = {
+		TAG_LEN:16, //Bytes
+
 		IV_FIXED_CLIENT:null,
 		IV_FIXED_RELAY:null,
 
@@ -48,6 +50,50 @@
 			nums[1] ^= incremental;
 			nums[2] ^= incremental;
 			return new Uint32Array(nums).buffer;
+		},
+
+		encrypt:function(iv, key, plaintext){
+			var _this = this;
+			return new Promise(function(resolve, reject){
+				if (typeof cryp.subtle !== typeof undefined){
+					cryp.subtle.encrypt({
+						name:"AES-GCM",
+						iv:iv
+					}, key, new TextEncoder().encode(plaintext))
+						.then(function(ciphertext){
+							resolve('"' + _this.ArrayBufferToBase64(ciphertext) + '"');
+						})
+						.catch(reject);
+				} else {
+					var cipher = cryp.createCipheriv("AES-256-GCM", key, iv);
+					var ciphertext = Buffer.concat([cipher.update(plaintext, "utf8"), cipher.final()]);
+					var tag = cipher.getAuthTag();
+					var encrypted = Buffer.concat([ciphertext, tag]).toString("base64");
+					resolve(encrypted);
+				}
+			});
+		},
+
+		decrypt:function(iv, key, ciphertext){
+			var _this = this;
+			return new Promise(function(resolve, reject){
+				if (typeof cryp.subtle !== typeof undefined){
+					cryp.subtle.decrypt({
+						name:"AES-GCM",
+						iv:iv
+					}, key, _this.base64ToArrayBuffer(ciphertext))
+						.then(function(plaintext){
+							resolve(new TextDecoder().decode(plaintext));
+						})
+						.catch(reject);
+				} else {
+					var encrypted = Buffer.from(ciphertext, "base64");
+					var decipher = cryp.createDecipheriv("AES-256-GCM", key, iv);
+					decipher.setAuthTag(encrypted.slice(-_this.TAG_LEN));
+					var decrypted = decipher.update(encrypted.slice(0, encrypted.length - _this.TAG_LEN), "binary", "utf8") + decipher.final("utf8");
+					resolve(decrypted);
+				}
+			});
 		}
 	};
 	getIVFixed("client").then(function(hash){

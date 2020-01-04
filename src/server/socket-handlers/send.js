@@ -1,13 +1,26 @@
+const Settings = require.main.require("./global/settings");
 const CryptoHelper = require.main.require("../shared/js/helpers/crypto");
+const State = require.main.require("./global/state");
 
-module.exports = function(socket, data, metadata, encrypt){
+module.exports = async function(socket, data, metadata, encrypt){
 	metadata = metadata || State.getSocketMetadata(socket.connectionId);
 	metadata.seqFromRelay++;
 	encrypt = encrypt !== false;
 
 	if (encrypt){
-		//TODO
-		//console.log("IV:", Buffer.from(CryptoHelper.computeIV(metadata.iv, CryptoHelper.IV_FIXED_RELAY, metadata.seqFromRelay)).toString("hex"));
+		try {
+			var iv = Buffer.from(CryptoHelper.computeIV(metadata.iv, CryptoHelper.IV_FIXED_RELAY, metadata.seqFromRelay));
+			/*if (Settings.DEBUG){
+				console.log("SEND:", metadata.seqFromRelay, iv);
+			}*/
+			data = await CryptoHelper.encrypt(iv, metadata.key, data);
+		} catch (err){
+			if (Settings.DEBUG){
+				throw err;
+			} else {
+				throw new Error(Resources.Strings.ERROR_ENCRYPT);
+			}
+		}
 	}
 
 	socket.send(data);

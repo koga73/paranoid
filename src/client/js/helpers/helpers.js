@@ -7,16 +7,15 @@
 				socket.metadata.seqFromClient++;
 
 				//Encrypt
-				var key = socket.metadata.sessionKey;
 				var iv = Helpers.Crypto.computeIV(socket.metadata.iv, Helpers.Crypto.IV_FIXED_CLIENT, socket.metadata.seqFromClient);
-				crypto.subtle.encrypt({
-					name:"AES-GCM",
-					iv:iv
-				}, key, new TextEncoder().encode(str))
+				var key = socket.metadata.sessionKey;
+				//console.log("SEND:", socket.metadata.seqFromClient, buf2hex(iv));
+				Helpers.Crypto.encrypt(iv, key, str)
 					.then(function(ciphertext){
 						//Send
-						socket.send('"' + Helpers.Crypto.ArrayBufferToBase64(ciphertext) + '"');
+						socket.send(ciphertext);
 					});
+					//.catch(ErrorHandler); //TODO: Error handling
 			},
 
 			clean:function(str){

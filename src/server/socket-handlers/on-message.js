@@ -1,5 +1,3 @@
-const crypto = require("crypto");
-
 const ErrorHandler = require.main.require("./global/error-handler");
 const Settings = require.main.require("./global/settings");
 const Resources = require.main.require("./resources");
@@ -15,7 +13,6 @@ module.exports = async function(evt, context, callback){
 	var socket = evt.requestContext;
 	var metadata = State.getSocketMetadata(socket.connectionId);
 	metadata.seqFromClient++;
-	var seqNum = metadata.seqFromClient;
 
 	//Lots of error checks, if anything goes wrong terminate the connection!
 	var debugObj = evt.body;
@@ -35,14 +32,11 @@ module.exports = async function(evt, context, callback){
 
 		//Decrypt
 		try {
-			var tagLen = 16; //Bytes
-			var encrypted = Buffer.from(data, "base64");
-			var iv = Buffer.from(CryptoHelper.computeIV(metadata.iv, CryptoHelper.IV_FIXED_CLIENT, seqNum));
-
-			var decipher = crypto.createDecipheriv("aes-256-gcm", metadata.key, iv);
-			decipher.setAuthTag(encrypted.slice(-tagLen));
-			data = decipher.update(encrypted.slice(0, encrypted.length - tagLen), "binary", "utf8") + decipher.final("utf8");
-
+			var iv = Buffer.from(CryptoHelper.computeIV(metadata.iv, CryptoHelper.IV_FIXED_CLIENT, metadata.seqFromClient));
+			/*if (Settings.DEBUG){
+				console.log("RECEIVE:", metadata.seqFromClient, iv);
+			}*/
+			data = await CryptoHelper.decrypt(iv, metadata.key, data);
 			debugObj = data;
 		} catch (err){
 			if (Settings.DEBUG){
@@ -61,11 +55,18 @@ module.exports = async function(evt, context, callback){
 		}
 
 		switch (data.code){
+
 			case Protocol.MSG.code:
-				caseMessage(socket, metadata, data);
+				caseMsg(socket, metadata, data);
 				break;
+
+			case Protocol.JOIN.code:
+				caseJoin(socket, metadata, data);
+				break;
+
 			default:
 				throw new Error(Resources.Strings.ERROR_INVALID_CODE);
+
 		}
 
 		if (callback){
@@ -86,7 +87,7 @@ module.exports = async function(evt, context, callback){
 	}
 };
 
-function caseMessage(socket, metadata, data){
+function caseMsg(socket, metadata, data){
 	var content = data.content || null;
 	if (!content){
 		throw new Error(Resources.Strings.ERROR_NO_CONTENT);
@@ -131,6 +132,40 @@ function caseMessage(socket, metadata, data){
 	throw new Error(Resources.Strings.ERROR_INVALID_TO);
 }
 
+function caseJoin(socket, metadata, data){
+	var from = data.from || null;
+	if (!from){
+		throw new Error(Resources.Strings.ERROR_NO_FROM);
+	}
+	if (from.length > Settings.MAX_USERNAME_SIZE){
+		throw new Error(Resources.Strings.ERROR_EXCEEDED_USERNAME);
+	}
+	const ANONYMOUS = Resources.Strings.ANONYMOUS;
+	if (from.toLowerCase() == ANONYMOUS.toLowerCase()){
+		from = `${ANONYMOUS}-{0}`.format(metadata.num);
+	} else {
+		//TODO
+	}
+
+	var to = data.to || null;
+	if (!to){
+		throw new Error(Resources.Strings.ERROR_NO_TO);
+	}
+	if (to.length > Settings.MAX_USERNAME_SIZE){
+		throw new Error(Resources.Strings.ERROR_EXCEEDED_USERNAME);
+	}
+
+	var room = State.getRoom(to);
+	room.members.push(socket);
+	var roomName = room.name;
+
+	Send(socket, Protocol.create(Protocol.ROOM, {
+		content:Protocol.ROOM.content.format(roomName),
+		name:roomName,
+		members:room.members.length
+	}), metadata);
+}
+
 function handle_message_error(socket, err, debugObj){
 	socket.terminate();
 	ErrorHandler.handler_invalid_message(err, debugObj);
@@ -146,7 +181,7 @@ function broadcast(fromSocket, metadata, roomName, data){
 		if (fromSocket.connectionId == socket.connectionId){
 			Send(socket, Protocol.create(Protocol.MSG, Object.assign({self:true}, data)), metadata);
 		} else {
-			Send(socket, dataObj, metadata);
+			Send(socket, dataObj);
 		}
 	});
 }

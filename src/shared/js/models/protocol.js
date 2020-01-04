@@ -17,7 +17,9 @@
 			type:_TYPE.SYSTEM,
 			code:100,
 			content:Strings.PROTOCOL_WELCOME || null,
-			key:null //Encrypt all future communication using this key
+			iv:null, //Base IV for future communication
+			key:null, //Encrypt all future communication using this key
+			room:Strings.DEFAULT_ROOM
 		},
 		ROOM:{
 			type:_TYPE.SYSTEM,
@@ -35,6 +37,13 @@
 			to:null,
 			content:null,
 			self:false
+		},
+		JOIN:{
+			type:_TYPE.USER,
+			code:210,
+			from:null,
+			to:null,
+			content:"join"
 		},
 
 		create:function(payload, params){

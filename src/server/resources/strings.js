@@ -14,6 +14,7 @@ module.exports = {
 	ERROR_EXISTS_SOCKET_ID:"socket id {0} already exists",
 	ERROR_INVALID_JSON:"invalid json",
 	ERROR_DECRYPT:"could not decrypt",
+	ERROR_ENCRYPT:"could not encrypt",
 	ERROR_NO_DATA:"no data",
 	ERROR_EXCEEDED_BODY:"exceeded body size",
 	ERROR_NO_CONTENT:"no content",

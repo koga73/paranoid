@@ -152,38 +152,50 @@
 				console.log("chat::handler_socket_message", evt);
 
 				var socket = evt.srcElement;
-				var seqNum = socket.metadata.seqFromRelay;
 				socket.metadata.seqFromRelay++;
+				var seqNum = socket.metadata.seqFromRelay;
 
-				var data;
-				if (seqNum){ //First message is unencrypted... for now
-					//TODO: Decrypt
+				var _this = this;
+				var promise;
+				if (seqNum - 1){ //First message is unencrypted... for now
+					//Decrypt
+					var iv = Helpers.Crypto.computeIV(socket.metadata.iv, Helpers.Crypto.IV_FIXED_RELAY, seqNum);
+					//console.log("RECEIVE:", seqNum, buf2hex(iv));
+					var key = socket.metadata.sessionKey;
+					promise = Helpers.Crypto.decrypt(iv, key, evt.data);
+				} else {
+					promise = Promise.resolve(evt.data);
 				}
-				data = JSON.parse(evt.data);
+				promise
+					.then(function(msg){
+						var data = JSON.parse(msg);
 
-				switch (data.code){
+						switch (data.code){
 
-					case Protocol.WELCOME.code:
-						socket.metadata.iv = Helpers.Crypto.base64ToArrayBuffer(data.iv);
-						//TODO: Move algorithm so not hard-coded
-						crypto.subtle.importKey("raw", Helpers.Crypto.base64ToArrayBuffer(data.key), "AES-GCM", false, ["encrypt", "decrypt"])
-							.then(function(secretKey){
-								socket.metadata.sessionKey = secretKey;
-							});
-						break;
+							case Protocol.WELCOME.code:
+								socket.metadata.iv = Helpers.Crypto.base64ToArrayBuffer(data.iv);
+								//TODO: Move algorithm so not hard-coded
+								crypto.subtle.importKey("raw", Helpers.Crypto.base64ToArrayBuffer(data.key), "AES-GCM", false, ["encrypt", "decrypt"])
+									.then(function(secretKey){
+										socket.metadata.sessionKey = secretKey;
+										send(Protocol.JOIN, _this.username, data.room);
+									});
+								break;
 
-					case Protocol.ROOM.code:
-						Models.Room.rooms.push(new Models.Room({
-							name:data.name,
-							relayName:socket.metadata.name,
-							members:data.members
-						}));
-						this.roomChangeHack=1;
-						this.context = "room:" + data.name;
-						break;
-				}
+							case Protocol.ROOM.code:
+								Models.Room.rooms.push(new Models.Room({
+									name:data.name,
+									relayName:socket.metadata.name,
+									members:data.members
+								}));
+								_this.roomChangeHack=1;
+								_this.context = "room:" + data.name;
+								break;
+						}
 
-				this.messages.push(data);
+						_this.messages.push(data);
+					})
+					//.catch(ErrorHandler); //TODO: Error handling
 			},
 
 			handler_message_send:function(evt){
@@ -205,7 +217,7 @@
                     return false;
 				}
 
-				send(this.username, this.context, this.message);
+				send(Protocol.MSG, this.username, this.context, this.message);
 				this.message = "";
 
 				return false;
@@ -283,8 +295,10 @@
 		return socket && socket.readyState == WebSocket.OPEN;
 	}
 
-	function send(from, to, content){
-		var data = Protocol.create(Protocol.MSG, {
+	function send(protocol, from, to, content){
+		content = content || null;
+
+		var data = Protocol.create(protocol, {
 			from:from, //This is verified on the relay
 			to:to,
 			content:content

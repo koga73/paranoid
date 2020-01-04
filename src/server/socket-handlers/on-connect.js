@@ -21,7 +21,6 @@ module.exports = function(evt, context, callback){
 	State.addSocketMetadata(metadata);
 
 	welcome(socket, metadata);
-	addToRoom(socket, metadata);
 
 	if (callback){
 		callback(null, {
@@ -37,15 +36,4 @@ function welcome(socket, metadata){
 		//TODO: Future use ECDH to generate and exchange key securely
 		key:metadata.key.toString("base64")
 	}), metadata, false);
-}
-
-function addToRoom(socket, metadata){
-	var defaultRoom = State.getRoom(Resources.Strings.DEFAULT_ROOM);
-	defaultRoom.members.push(socket);
-
-	Send(socket, Protocol.create(Protocol.ROOM, {
-		content:Protocol.ROOM.content.format(defaultRoom.name),
-		name:defaultRoom.name,
-		members:defaultRoom.members.length
-	}), metadata);
 }
