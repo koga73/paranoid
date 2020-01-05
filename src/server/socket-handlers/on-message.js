@@ -4,7 +4,7 @@ const Resources = require.main.require("./resources");
 const Send = require.main.require("./socket-handlers/send");
 const Protocol = require.main.require("../shared/js/models/protocol");
 const State = require.main.require("./global/state");
-const CryptoHelper = require.main.require("../shared/js/helpers/crypto");
+const CryptoHelper = require.main.require("./helpers/crypto");
 
 module.exports = async function(evt, context, callback){
 	context = context || null;
