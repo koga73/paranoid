@@ -25,16 +25,25 @@ const config = {
 			output:dst
 		}
 	},
+	jsLib:{
+		name:"js-lib",
+		files:{
+			input:[
+				src + "client/js/_lib/promise-polyfill.js",
+				src + "client/js/_lib/vue.js",
+				src + "client/js/_lib/axios.js",
+				src + "client/js/_lib/oop.js",
+			],
+			output:dst + "js/"
+		}
+	},
 	js:{
 		name:"js",
 		files:{
 			input:[
 				src + "client/js/polyfill/random.js",
 				src + "shared/js/polyfill/string.js",
-				src + "client/js/_lib/promise-polyfill.js",
-				src + "client/js/_lib/axios.js",
-				src + "client/js/_lib/oop.js",
-				src + "client/js/resources/strings.js",
+				src + "client/js/global/error-handler.js",
 				src + "client/js/helpers/helpers.js",
 				src + "client/js/helpers/regex-patterns.js",
 				src + "client/js/helpers/crypto.js",
@@ -94,9 +103,21 @@ function bundleJS(config){
 }
 createTask("js", bundleJS, [config.js]);
 
+//js-lib
+function bundleJSLib(config){
+	gulp.src(config.files.input)
+		.pipe(sourcemaps.init())
+		.pipe(concat("lib.js"))
+		.pipe(uglify())
+		.pipe(sourcemaps.write("./"))
+		.pipe(gulp.dest(config.files.output));
+}
+createTask("js-lib", bundleJSLib, [config.jsLib]);
+
 //clean
 //clean:static
 //clean:js
+//clean:js-lib
 //clean:sass
 function clean(config){
 	return del([config.files.output]);
@@ -106,6 +127,7 @@ createTask("clean", clean, [config.static, config.js, config.sass]);
 //build
 //build:static
 //build:js
+//build:js-lib
 //build:sass
 function build(buildConfig){
 	switch (buildConfig.name){
@@ -115,31 +137,36 @@ function build(buildConfig){
 		case config.js.name:
 			bundleJS(buildConfig);
 			break;
+		case config.jsLib.name:
+			bundleJSLib(buildConfig);
+			break;
 		case config.sass.name:
 			compileSass(buildConfig);
 			break;
 	}
 }
-createTask("build", build, [config.static, config.js, config.sass]);
+createTask("build", build, [config.static, config.js, config.jsLib, config.sass]);
 
 //watch
 //watch:static
 //watch:js
+//watch:js-lib
 //watch:sass
 function watch(config){
 	return gulp.watch(config.files.input, ["build:" + config.name]);
 }
-createTask("watch", watch, [config.static, config.js, config.sass]);
+createTask("watch", watch, [config.static, config.js, config.jsLib, config.sass]);
 
 //portable
 gulp.task("portable", function(){
-	return gulp.src(dst + "index.html")
-				.pipe(inlinesource({
-					attribute:false,
-					rootpath:dst
-				}))
-				.pipe(rename("paranoid-portable.html"))
-				.pipe(gulp.dest(dst));
+	return gulp
+		.src(dst + "index.html")
+		.pipe(inlinesource({
+			attribute:false,
+			rootpath:dst
+		}))
+		.pipe(rename("paranoid-portable.html"))
+		.pipe(gulp.dest(dst));
 });
 
 gulp.task("default", ["build"]);

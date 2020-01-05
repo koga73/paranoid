@@ -383,6 +383,29 @@
 		};
 	</script>
 
-	<script src="js/_lib/vue.js"></script>
+	<script src="js/lib.js"></script>
+	<script>
+		/* Strings inline to make translation easier */
+		(function(){
+			OOP.namespace("Resources.Strings",
+			OOP.construct({
+
+				static:{
+					EXISTS_CIPHER:"Cipher {0} already exists",
+					EXISTS_RELAY:"Relay {0} already exists",
+					LOADED_CIPHER:"Cipher {0} loaded",
+					CONNECTED:"Connected:",
+					DISCONNECTED:"Disconnected:",
+
+					ERROR_NETWORK:"A network error has occured. Please check your connection and try again.",
+					ERROR_GENERAL:"An error has occured.",
+					ERROR_UNCAUGHT:"An unexpected error has occured.",
+					ERROR_INVALID_ARRAY_LENGTH:"invalid array length"
+				}
+
+			}));
+		})();
+	</script>
 	<script src="js/site.js"></script>
+
 </html>
