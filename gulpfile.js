@@ -55,6 +55,8 @@ const config = {
 				src + "client/js/models/room.js",
 				src + "client/js/models/socket-metadata.js",
 				src + "shared/js/models/protocol.js",
+				src + "client/js/socket-handlers/on-message.js",
+				src + "client/js/socket-handlers/send.js",
 				src + "client/js/components/preferences.js",
 				src + "client/js/components/relays.js",
 				src + "client/js/components/accounts.js",

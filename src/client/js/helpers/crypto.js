@@ -1,8 +1,11 @@
 (function(){
+	var _class =
     OOP.namespace("Helpers.Crypto",
     OOP.construct({
 
         static:{
+			ALGORITHM_SYMMETRIC:"AES-GCM",
+			ALGORITHM_HASH:"SHA-256",
 			TAG_LEN:16, //Bytes
 
 			IV_FIXED_CLIENT:0,
@@ -12,7 +15,7 @@
 				var _this = this;
 				return new Promise(function(resolve, reject){
 					crypto.subtle.encrypt({
-						name:"AES-GCM",
+						name:_this.ALGORITHM_SYMMETRIC,
 						iv:iv
 					}, key, new TextEncoder().encode(plaintext))
 						.then(function(ciphertext){
@@ -26,7 +29,7 @@
 				var _this = this;
 				return new Promise(function(resolve, reject){
 					crypto.subtle.decrypt({
-						name:"AES-GCM",
+						name:_this.ALGORITHM_SYMMETRIC,
 						iv:iv
 					}, key, _this.base64ToArrayBuffer(ciphertext))
 						.then(function(plaintext){
@@ -36,7 +39,17 @@
 				});
 			},
 
+			loadKeySymmetric:function(base64Key){
+				return crypto.subtle.importKey("raw", this.base64ToArrayBuffer(base64Key), this.ALGORITHM_SYMMETRIC, false, ["encrypt", "decrypt"])
+			},
+
+			//GCM MUST NOT REUSE IV WITH SAME KEY
+			//Although GCM key length can be variable, 12-bit is recommended
+			//NIST SP-800-38D: 8.2.1 Deterministic Construction
+			//
 			//startIV = random byte array of length 12
+			//Fixed numerical value stays same per message
+			//Incremental numerical value that changes per message (sequence number)
 			computeIV:function(startIV, fixed, incremental){
 				if (startIV.byteLength != 12){
 					throw new Error(Resources.Strings.ERROR_INVALID_ARRAY_LENGTH);
@@ -51,6 +64,7 @@
 					num |= startIV[i + 3] << 24;
 					nums.push(num);
 				}
+				//GCM recommends first byte be fixed and last two dynamic per message
 				nums[0] ^= fixed;
 				nums[1] ^= incremental;
 				nums[2] ^= incremental;
@@ -60,7 +74,7 @@
 			//Hash the input and turn the first 4 bytes into a 32-bit number
 			//This doesn't need to be super unique as this value will get XOR'd with randomBytes
 			getIVFixed:function(phrase){
-				return crypto.subtle.digest("SHA-256", new TextEncoder().encode(phrase))
+				return crypto.subtle.digest(this.ALGORITHM_HASH, new TextEncoder().encode(phrase))
 					.then(function(hash){
 						hash = new Uint8Array(hash);
 						var fixedVal = 0;
@@ -90,15 +104,23 @@
 						return data + String.fromCharCode(byte);
 					}, "")
 				);
+			},
+
+			//Grabbed from: https://stackoverflow.com/a/40031979/3610169
+			buf2hex:function(arrayBuffer, delimiter){
+				delimiter = delimiter || '';
+				return Array.prototype.map.call(new Uint8Array(arrayBuffer), function(x){
+					return ('00' + x.toString(16)).slice(-2);
+				}).join(delimiter);
 			}
 		}
 
 	}));
 
-	Helpers.Crypto.getIVFixed("client").then(function(code){
-		Helpers.Crypto.IV_FIXED_CLIENT = code;
+	_class.getIVFixed("client").then(function(code){
+		_class.IV_FIXED_CLIENT = code;
 	});
-	Helpers.Crypto.getIVFixed("relay").then(function(code){
-		Helpers.Crypto.IV_FIXED_RELAY = code;
+	_class.getIVFixed("relay").then(function(code){
+		_class.IV_FIXED_RELAY = code;
 	});
 })();

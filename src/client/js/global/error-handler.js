@@ -10,7 +10,7 @@
 					message = error.userFriendlyMessage;
 				}
 
-				var networkResponse = error.response || null;
+				var networkResponse = error.response || error;
 				var code = (networkResponse) ? networkResponse.status : error.code;
 				switch (code){
 					case -1: //Timeout
@@ -23,7 +23,7 @@
 
 				console.info("ErrorHandler::network - networkResponse:", networkResponse);
 
-				_methods._showMessage(message);
+				_showMessage(message);
 			},
 
 			//Caught handler can be referenced usage
@@ -34,7 +34,7 @@
 				if (error && typeof error !== typeof undefined && error.userFriendlyMessage) {
 					message = error.userFriendlyMessage;
 				}
-				_methods._showMessage(message);
+				_showMessage(message);
 			},
 
 			//Uncaught handler - these errors should be considered fatal
@@ -45,7 +45,7 @@
 				if (error && typeof error !== typeof undefined && error.userFriendlyMessage) {
 					message = error.userFriendlyMessage;
 				}
-				_methods._showMessage(message);
+				_showMessage(message);
 			},
 
 			//Warn handler for referenced usage
@@ -56,14 +56,14 @@
 				if (warning && typeof warning !== typeof undefined && warning.userFriendlyMessage) {
 					message = warning.userFriendlyMessage;
 				}
-				_methods._showMessage(message);
-			},
-
-			_showMessage: function(message) {
-				//TODO
+				_showMessage(message);
 			}
 		}
 	}));
+
+	function _showMessage(message){
+		//TODO
+	}
 
 	(function init(){
 		//VueJS uncaught error hook

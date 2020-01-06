@@ -35,7 +35,7 @@
 				var count = 0;
 				var socketsLen = sockets.length;
 				for (var i = 0; i < socketsLen; i++){
-					if (isConnected(sockets[i])){
+					if (Helpers.socketIsConnected(sockets[i])){
 						count++;
 					}
 				}
@@ -53,7 +53,7 @@
 
 				var summary = "";
 
-				var connected = sockets.filter(isConnected);
+				var connected = sockets.filter(Helpers.socketIsConnected);
 				if (connected.length){
 					summary += Resources.Strings.CONNECTED + "\n";
 					summary += connected.reduce(function(summary, socket){
@@ -63,7 +63,7 @@
 				}
 
 				var disconnected = sockets.filter(function(socket){
-					return !isConnected(socket);
+					return !Helpers.socketIsConnected(socket);
 				});
 				if (disconnected.length){
 					summary += Resources.Strings.DISCONNECTED + "\n";
@@ -151,51 +151,17 @@
 			handler_socket_message:function(evt){
 				console.log("chat::handler_socket_message", evt);
 
-				var socket = evt.srcElement;
-				socket.metadata.seqFromRelay++;
-				var seqNum = socket.metadata.seqFromRelay;
-
 				var _this = this;
-				var promise;
-				if (seqNum - 1){ //First message is unencrypted... for now
-					//Decrypt
-					var iv = Helpers.Crypto.computeIV(socket.metadata.iv, Helpers.Crypto.IV_FIXED_RELAY, seqNum);
-					//console.log("RECEIVE:", seqNum, buf2hex(iv));
-					var key = socket.metadata.sessionKey;
-					promise = Helpers.Crypto.decrypt(iv, key, evt.data);
-				} else {
-					promise = Promise.resolve(evt.data);
-				}
-				promise
-					.then(function(msg){
-						var data = JSON.parse(msg);
-
-						switch (data.code){
-
-							case Protocol.WELCOME.code:
-								socket.metadata.iv = Helpers.Crypto.base64ToArrayBuffer(data.iv);
-								//TODO: Move algorithm so not hard-coded
-								crypto.subtle.importKey("raw", Helpers.Crypto.base64ToArrayBuffer(data.key), "AES-GCM", false, ["encrypt", "decrypt"])
-									.then(function(secretKey){
-										socket.metadata.sessionKey = secretKey;
-										send(Protocol.JOIN, _this.username, data.room);
-									});
-								break;
-
-							case Protocol.ROOM.code:
-								Models.Room.rooms.push(new Models.Room({
-									name:data.name,
-									relayName:socket.metadata.name,
-									members:data.members
-								}));
-								_this.roomChangeHack=1;
-								_this.context = "room:" + data.name;
-								break;
+				SocketHandlers.OnMessage(evt, sockets, this.username)
+					.then(function(data){
+						var context = data.context || null;
+						if (context){
+							_this.context = context;
+							_this.roomChangeHack=1;
 						}
-
-						_this.messages.push(data);
+						_this.messages.push(data.msg);
 					})
-					//.catch(ErrorHandler); //TODO: Error handling
+					.catch(Global.ErrorHandler.caught)
 			},
 
 			handler_message_send:function(evt){
@@ -217,7 +183,7 @@
                     return false;
 				}
 
-				send(Protocol.MSG, this.username, this.context, this.message);
+				SocketHandlers.Send(sockets, Protocol.MSG, this.username, this.context, this.message);
 				this.message = "";
 
 				return false;
@@ -289,27 +255,5 @@
 			}
 		}
 		return null;
-	}
-
-	function isConnected(socket){
-		return socket && socket.readyState == WebSocket.OPEN;
-	}
-
-	function send(protocol, from, to, content){
-		content = content || null;
-
-		var data = Protocol.create(protocol, {
-			from:from, //This is verified on the relay
-			to:to,
-			content:content
-		});
-
-		var socketsLen = sockets.length;
-		for (var i = 0; i < socketsLen; i++){
-			var socket = sockets[i];
-			if (isConnected(socket)){
-				Helpers.send(socket, data);
-			}
-		}
 	}
 })();
