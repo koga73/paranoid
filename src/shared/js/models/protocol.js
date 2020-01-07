@@ -12,13 +12,21 @@
 	creationContext({
 		TYPE:_TYPE,
 
+
 		//System
-		WELCOME:{
+		KEY:{
 			type:_TYPE.SYSTEM,
 			code:100,
+			content:null
+		},
+		READY:{
+			type:_TYPE.SYSTEM,
+			code:110,
+		},
+		WELCOME:{
+			type:_TYPE.SYSTEM,
+			code:120,
 			content:Strings.PROTOCOL_WELCOME || null,
-			iv:null, //Base IV for future communication
-			key:null, //Encrypt all future communication using this key
 			room:Strings.DEFAULT_ROOM
 		},
 		ROOM:{

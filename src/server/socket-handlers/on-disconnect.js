@@ -12,6 +12,7 @@ module.exports = function(evt, context, callback){
 	}
 
 	State.removeSocketMetadata(socket.connectionId);
+	//TODO: Remove socket from room!
 
 	if (callback){
 		callback(null, {

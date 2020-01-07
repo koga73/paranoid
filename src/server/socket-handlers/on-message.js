@@ -4,6 +4,7 @@ const Resources = require.main.require("./resources");
 const Send = require.main.require("./socket-handlers/send");
 const Protocol = require.main.require("../shared/js/models/protocol");
 const State = require.main.require("./global/state");
+const Models = require.main.require("./models");
 const CryptoHelper = require.main.require("./helpers/crypto");
 
 module.exports = async function(evt, context, callback){
@@ -30,31 +31,40 @@ module.exports = async function(evt, context, callback){
 			throw new Error(Resources.Strings.ERROR_INVALID_JSON);
 		}
 
-		//Decrypt
-		try {
-			var iv = Buffer.from(CryptoHelper.computeIV(metadata.iv, CryptoHelper.IV_FIXED_CLIENT, metadata.seqFromClient));
-			/*if (Settings.DEBUG){
-				console.log("RECEIVE:", metadata.seqFromClient, iv);
-			}*/
-			data = await CryptoHelper.decrypt(iv, metadata.key, data);
-			debugObj = data;
-		} catch (err){
-			if (Settings.DEBUG){
-				throw err;
-			} else {
-				throw new Error(Resources.Strings.ERROR_DECRYPT);
+		if (metadata.state != Models.SocketMetadata.STATE.KEY){
+			//Decrypt
+			try {
+				var iv = Buffer.from(CryptoHelper.computeIV(metadata.iv, CryptoHelper.IV_FIXED_CLIENT, metadata.seqFromClient));
+				/*if (Settings.DEBUG){
+					console.log("RECEIVE:", metadata.seqFromClient, iv);
+				}*/
+				data = await CryptoHelper.decrypt(iv, metadata.key, data);
+				debugObj = data;
+			} catch (err){
+				if (Settings.DEBUG){
+					throw err;
+				} else {
+					throw new Error(Resources.Strings.ERROR_DECRYPT);
+				}
+			}
+			//Parse JSON
+			try {
+				data = JSON.parse(data);
+				debugObj = data;
+			} catch (err){
+				throw new Error(Resources.Strings.ERROR_INVALID_JSON);
 			}
 		}
 
-		//Parse JSON
-		try {
-			data = JSON.parse(data);
-			debugObj = data;
-		} catch (err){
-			throw new Error(Resources.Strings.ERROR_INVALID_JSON);
-		}
-
 		switch (data.code){
+
+			case Protocol.KEY.code:
+				caseKey(socket, metadata, data);
+				break;
+
+			case Protocol.READY.code:
+				caseReady(socket, metadata, data);
+				break;
 
 			case Protocol.MSG.code:
 				caseMsg(socket, metadata, data);
@@ -86,6 +96,29 @@ module.exports = async function(evt, context, callback){
 		}
 	}
 };
+
+function caseKey(socket, metadata, data){
+	var publicKey = data.content || null;
+	if (!Resources.Regex.ECDH_KEY.test(publicKey)){
+		throw new Error(Resources.Strings.ERROR_INVALID_KEY);
+	}
+
+	var keyPair = CryptoHelper.generateKeyAsym(publicKey);
+	Send(socket, Protocol.create(Protocol.KEY, {
+		content:keyPair.publicKey.toString("hex")
+	}), metadata, false);
+
+	//console.log("IV:", keyPair.iv);
+	//console.log("KEY:", keyPair.key);
+
+	metadata.iv = keyPair.iv;
+	metadata.key = keyPair.key;
+	metadata.state = Models.SocketMetadata.STATE.ESTABLISHED;
+}
+
+function caseReady(socket, metadata, data){
+	Send(socket, Protocol.create(Protocol.WELCOME, null, metadata, false));
+}
 
 function caseMsg(socket, metadata, data){
 	var content = data.content || null;

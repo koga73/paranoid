@@ -25,6 +25,7 @@ module.exports = {
 	ERROR_INVALID_CODE:"invalid code",
 	ERROR_INVALID_TO:"invalid to",
 	ERROR_INVALID_ARRAY_LENGTH:"invalid array length",
+	ERROR_INVALID_KEY:"invalid key",
 
 	//Protocol strings
 	PROTOCOL_WELCOME:`Connected to ${Settings.NAME} ${Settings.VERSION}`,

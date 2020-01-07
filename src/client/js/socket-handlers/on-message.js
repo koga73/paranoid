@@ -6,11 +6,11 @@
 			var seqNum = socket.metadata.seqFromRelay;
 
 			var promise;
-			if (seqNum - 1){ //First message is unencrypted... for now
+			if (socket.metadata.state != Models.SocketMetadata.STATE.KEY){
 				//Decrypt
 				var iv = Helpers.Crypto.computeIV(socket.metadata.iv, Helpers.Crypto.IV_FIXED_RELAY, seqNum);
 				//console.log("RECEIVE:", seqNum, buf2hex(iv));
-				var key = socket.metadata.sessionKey;
+				var key = socket.metadata.key;
 				promise = Helpers.Crypto.decrypt(iv, key, evt.data);
 			} else {
 				promise = Promise.resolve(evt.data);
@@ -22,13 +22,32 @@
 					var data = JSON.parse(msg);
 					switch (data.code){
 
+						case Protocol.KEY.code:
+							var publicKey = data.content;
+							if (!Helpers.RegexPatterns.ECDH_KEY.test(publicKey)){
+								throw new Error(Resources.Strings.ERROR_INVALID_KEY);
+							}
+
+							Helpers.Crypto.deriveSecretKey(socket.metadata.keyPair.privateKey, publicKey)
+								.then(function(ivKey){
+									//console.log("IV:", Helpers.Crypto.buf2hex(ivKey.iv, " "));
+									//console.log("KEY:", Helpers.Crypto.buf2hex(ivKey.key, " "));
+
+									delete socket.metadata.keyPair;
+									socket.metadata.iv = ivKey.iv;
+									Helpers.Crypto.loadKeySymmetric(ivKey.key)
+										.then(function(loadedKey){
+											socket.metadata.key = loadedKey;
+											socket.metadata.state = Models.SocketMetadata.STATE.ESTABLISHED;
+
+											SocketHandlers.Send(sockets, Protocol.READY);
+										});
+								})
+								.catch(Global.ErrorHandler.caught);
+							break;
+
 						case Protocol.WELCOME.code:
-							socket.metadata.iv = Helpers.Crypto.base64ToArrayBuffer(data.iv);
-							Helpers.Crypto.loadKeySymmetric(data.key)
-								.then(function(secretKey){
-									socket.metadata.sessionKey = secretKey;
-									SocketHandlers.Send(sockets, Protocol.JOIN, fromUsername, data.room);
-								});
+							SocketHandlers.Send(sockets, Protocol.JOIN, fromUsername, data.room);
 							break;
 
 						case Protocol.ROOM.code:

@@ -4,9 +4,14 @@ const Strings = require.main.require("./resources/strings");
 
 var _class = {
 	ALGORITHM_SYMMETRIC:"AES-256-GCM",
-	ALGORITHM_HASH:"sha256",
+	KEY_LEN:32, //Bytes (32 * 8 = 256-bit)
 	TAG_LEN:16, //Bytes
 
+	NAMED_CURVE:"secp521r1",
+
+	ALGORITHM_HASH:"sha256",
+
+	IV_LEN:12, //Bytes
 	IV_FIXED_CLIENT:0,
 	IV_FIXED_RELAY:0,
 
@@ -24,6 +29,17 @@ var _class = {
 		decipher.setAuthTag(encrypted.slice(-this.TAG_LEN));
 		var decrypted = decipher.update(encrypted.slice(0, encrypted.length - this.TAG_LEN), "binary", "utf8") + decipher.final("utf8");
 		return Promise.resolve(decrypted);
+	},
+
+	generateKeyAsym:function(clientPublicKey){
+		var ecdh = crypto.createECDH(this.NAMED_CURVE);
+		ecdh.generateKeys();
+		var sharedSecret = ecdh.computeSecret(clientPublicKey, "hex");
+		return {
+			publicKey:ecdh.getPublicKey("hex"),
+			iv:sharedSecret.slice(0, this.IV_LEN),
+			key:sharedSecret.slice(-this.KEY_LEN)
+		};
 	},
 
 	//GCM MUST NOT REUSE IV WITH SAME KEY

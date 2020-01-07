@@ -5,9 +5,15 @@
 
         static:{
 			ALGORITHM_SYMMETRIC:"AES-GCM",
-			ALGORITHM_HASH:"SHA-256",
+			KEY_LEN:32, //Bytes (32 * 8 = 256-bit)
 			TAG_LEN:16, //Bytes
 
+			ALGORITHM_ASYMMETRIC:"ECDH",
+			NAMED_CURVE:"P-521",
+
+			ALGORITHM_HASH:"SHA-256",
+
+			IV_LEN:12, //Bytes
 			IV_FIXED_CLIENT:0,
 			IV_FIXED_RELAY:0,
 
@@ -39,8 +45,58 @@
 				});
 			},
 
-			loadKeySymmetric:function(base64Key){
-				return crypto.subtle.importKey("raw", this.base64ToArrayBuffer(base64Key), this.ALGORITHM_SYMMETRIC, false, ["encrypt", "decrypt"])
+			loadKeySymmetric:function(arrayBuffer){
+				return crypto.subtle.importKey("raw", arrayBuffer, this.ALGORITHM_SYMMETRIC, false, ["encrypt", "decrypt"]);
+			},
+
+			generateKeyAsym:function(){
+				var _this = this;
+				return new Promise(function(resolve, reject){
+					crypto.subtle.generateKey({
+						name:_this.ALGORITHM_ASYMMETRIC,
+						namedCurve:_this.NAMED_CURVE
+					}, true, ["deriveKey", "deriveBits"])
+						.then(function(keyPair){
+							crypto.subtle.exportKey("raw", keyPair.publicKey)
+								.then(function(exportedPublicKey){
+									resolve({
+										publicKey:_this.buf2hex(exportedPublicKey),
+										privateKey:keyPair.privateKey
+									});
+								})
+								.catch(reject);
+						})
+						.catch(reject);
+				});
+			},
+
+			deriveSecretKey:function(privateKey, relayPublicKey){
+				var _this = this;
+				return new Promise(function(resolve, reject){
+					return _this.loadKeyAsymmetric(relayPublicKey)
+						.then(function(publicKey){
+							crypto.subtle.deriveBits({
+								name:_this.ALGORITHM_ASYMMETRIC,
+								namedCurve:_this.NAMED_CURVE,
+								public:publicKey
+							}, privateKey, 66 * 8)
+								.then(function(secretKey){
+									resolve({
+										iv:secretKey.slice(0, _this.IV_LEN),
+										key:secretKey.slice(-_this.KEY_LEN)
+									});
+								})
+								.catch(reject);
+						})
+						.catch(reject);
+				});
+			},
+
+			loadKeyAsymmetric:function(hexKey){
+				return crypto.subtle.importKey("raw", this.hex2buf(hexKey), {
+					name:this.ALGORITHM_ASYMMETRIC,
+					namedCurve:this.NAMED_CURVE
+				}, false, []); //Not obvious but for chrome the usage array needs to be empty: https://stackoverflow.com/q/54179887/3610169
 			},
 
 			//GCM MUST NOT REUSE IV WITH SAME KEY
@@ -51,7 +107,7 @@
 			//Fixed numerical value stays same per message
 			//Incremental numerical value that changes per message (sequence number)
 			computeIV:function(startIV, fixed, incremental){
-				if (startIV.byteLength != 12){
+				if (startIV.byteLength != this.IV_LEN){
 					throw new Error(Resources.Strings.ERROR_INVALID_ARRAY_LENGTH);
 				}
 				var nums = [];
@@ -112,6 +168,12 @@
 				return Array.prototype.map.call(new Uint8Array(arrayBuffer), function(x){
 					return ('00' + x.toString(16)).slice(-2);
 				}).join(delimiter);
+			},
+
+			hex2buf:function(hex){
+				return new Uint8Array(hex.match(/[\da-f]{2}/gi).map(function(h){
+					return parseInt(h, 16);
+				})).buffer;
 			}
 		}
 

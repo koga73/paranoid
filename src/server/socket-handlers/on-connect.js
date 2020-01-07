@@ -20,20 +20,9 @@ module.exports = function(evt, context, callback){
 	});
 	State.addSocketMetadata(metadata);
 
-	welcome(socket, metadata);
-
 	if (callback){
 		callback(null, {
 			statusCode:200
 		});
 	}
 };
-
-function welcome(socket, metadata){
-	Send(socket, Protocol.create(Protocol.WELCOME, {
-		iv:metadata.iv.toString("base64"),
-		//Note: Currently MITM has to be active during connection to get this key
-		//TODO: Future use ECDH to generate and exchange key securely
-		key:metadata.key.toString("base64")
-	}), metadata, false);
-}

@@ -140,7 +140,16 @@
 			handler_socket_open:function(evt){
 				console.log("chat::handler_socket_open", evt);
 				this.socketChangeHack=1;
-			},
+
+				var socket = evt.srcElement;
+
+				Helpers.Crypto.generateKeyAsym()
+					.then(function(keyPair){
+						socket.metadata.keyPair = keyPair;
+						SocketHandlers.Send(sockets, Protocol.KEY, null, null, keyPair.publicKey);
+					})
+					.catch(Global.ErrorHandler.caught);
+;			},
 
 			handler_socket_close:function(evt){
 				console.log("chat::handler_socket_close", evt);
@@ -151,6 +160,8 @@
 			handler_socket_message:function(evt){
 				console.log("chat::handler_socket_message", evt);
 
+				var socket = evt.srcElement;
+
 				var _this = this;
 				SocketHandlers.OnMessage(evt, sockets, this.username)
 					.then(function(data){
@@ -159,7 +170,9 @@
 							_this.context = context;
 							_this.roomChangeHack=1;
 						}
-						_this.messages.push(data.msg);
+						if (socket.metadata.state != Models.SocketMetadata.STATE.KEY){
+							_this.messages.push(data.msg);
+						}
 					})
 					.catch(Global.ErrorHandler.caught)
 			},
