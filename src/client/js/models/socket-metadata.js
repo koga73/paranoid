@@ -9,7 +9,6 @@
 
         instance:{
 			name:"",
-			keyPair:null,
 			iv:null,
 			key:null,
 			seqFromRelay:0,

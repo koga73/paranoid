@@ -1,5 +1,5 @@
 (function(){
-    OOP.namespace("Helpers.RegexPatterns",
+    OOP.namespace("Resources.Regex",
     OOP.construct({
 
         static:{

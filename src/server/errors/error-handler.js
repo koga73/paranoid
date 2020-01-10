@@ -1,14 +1,14 @@
 const Settings = require.main.require("./global/settings");
 
 module.exports = {
-	handler_invalid_message:function(error, debugObj){
+	handler_bad_request:function(error, debugObj){
 		debugObj = debugObj || null;
 
 		if (error.isFatal === true){
 			_methods.handler_caught_fatal(error);
 		} else {
 			//Recoverable
-			console.warn(`INVALID MESSAGE: ${error.message}`);
+			console.warn(`BAD REQUEST: ${error.message}`);
 			if (Settings.DEBUG && debugObj){
 				console.log(debugObj);
 			}

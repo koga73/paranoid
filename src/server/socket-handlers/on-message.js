@@ -1,9 +1,10 @@
-const ErrorHandler = require.main.require("./global/error-handler");
-const Settings = require.main.require("./global/settings");
-const Resources = require.main.require("./resources");
 const Send = require.main.require("./socket-handlers/send");
-const Protocol = require.main.require("../shared/js/models/protocol");
+const ErrorHandler = require.main.require("./errors/error-handler");
+const RequestError = require.main.require("./errors/request-error");
+const Settings = require.main.require("./global/settings");
 const State = require.main.require("./global/state");
+const Resources = require.main.require("./resources");
+const Protocol = require.main.require("../shared/js/models/protocol");
 const Models = require.main.require("./models");
 const CryptoHelper = require.main.require("./helpers/crypto");
 
@@ -19,7 +20,7 @@ module.exports = async function(evt, context, callback){
 	var debugObj = evt.body;
 	try {
 		if (evt.body > Settings.MAX_BODY_SIZE){
-			throw new Error(Resources.Strings.ERROR_EXCEEDED_BODY);
+			throw new RequestError(Resources.Strings.ERROR_EXCEEDED_BODY);
 		}
 
 		var data = null;
@@ -28,7 +29,7 @@ module.exports = async function(evt, context, callback){
 			data = JSON.parse(evt.body).message;
 			debugObj = data;
 		} catch (err){
-			throw new Error(Resources.Strings.ERROR_INVALID_JSON);
+			throw new RequestError(Resources.Strings.ERROR_INVALID_JSON);
 		}
 
 		if (metadata.state != Models.SocketMetadata.STATE.KEY){
@@ -44,7 +45,7 @@ module.exports = async function(evt, context, callback){
 				if (Settings.DEBUG){
 					throw err;
 				} else {
-					throw new Error(Resources.Strings.ERROR_DECRYPT);
+					throw new RequestError(Resources.Strings.ERROR_DECRYPT);
 				}
 			}
 			//Parse JSON
@@ -52,8 +53,13 @@ module.exports = async function(evt, context, callback){
 				data = JSON.parse(data);
 				debugObj = data;
 			} catch (err){
-				throw new Error(Resources.Strings.ERROR_INVALID_JSON);
+				throw new RequestError(Resources.Strings.ERROR_INVALID_JSON);
 			}
+		}
+
+		//Validate that code passed is allowed for current state
+		if (!metadata.validate(data.code)){
+			throw new RequestError(Resources.Strings.ERROR_INVALID_CODE);
 		}
 
 		switch (data.code){
@@ -75,7 +81,7 @@ module.exports = async function(evt, context, callback){
 				break;
 
 			default:
-				throw new Error(Resources.Strings.ERROR_INVALID_CODE);
+				throw new RequestError(Resources.Strings.ERROR_INVALID_CODE);
 
 		}
 
@@ -85,8 +91,11 @@ module.exports = async function(evt, context, callback){
 			});
 		}
 	} catch (err){
-		//TODO: Filter between custom validation errors above and actual uncaught errors
-		handle_message_error(socket, err, debugObj);
+		if (err instanceof RequestError){
+			ErrorHandler.handler_bad_request(err, debugObj);
+		} else {
+			ErrorHandler.handler_caught_exception(err);
+		}
 
 		if (callback){
 			callback(null, {
@@ -94,13 +103,14 @@ module.exports = async function(evt, context, callback){
 				body:err.message
 			});
 		}
+		socket.terminate();
 	}
 };
 
 function caseKey(socket, metadata, data){
 	var publicKey = data.content || null;
 	if (!Resources.Regex.ECDH_KEY.test(publicKey)){
-		throw new Error(Resources.Strings.ERROR_INVALID_KEY);
+		throw new RequestError(Resources.Strings.ERROR_INVALID_KEY);
 	}
 
 	var keyPair = CryptoHelper.generateKeyAsym(publicKey);
@@ -117,76 +127,29 @@ function caseKey(socket, metadata, data){
 }
 
 function caseReady(socket, metadata, data){
-	Send(socket, Protocol.create(Protocol.WELCOME, null, metadata, false));
+	Send(socket, Protocol.create(Protocol.WELCOME), metadata);
 }
 
 function caseMsg(socket, metadata, data){
-	var content = data.content || null;
-	if (!content){
-		throw new Error(Resources.Strings.ERROR_NO_CONTENT);
-	}
-	if (content.length > Settings.MAX_CONTENT_SIZE){
-		throw new Error(Resources.Strings.ERROR_CONTENT_MESSAGE);
-	}
+	var from = validateFrom(data.from).format(metadata.num);
+	var to = validateTo(data.to);
+	var content = validateContent(data.content);
 
-	var from = data.from || null;
-	if (!from){
-		throw new Error(Resources.Strings.ERROR_NO_FROM);
-	}
-	if (from.length > Settings.MAX_USERNAME_SIZE){
-		throw new Error(Resources.Strings.ERROR_EXCEEDED_USERNAME);
-	}
-	const ANONYMOUS = Resources.Strings.ANONYMOUS;
-	if (from.toLowerCase() == ANONYMOUS.toLowerCase()){
-		from = `${ANONYMOUS}-{0}`.format(metadata.num);
-	} else {
-		//TODO
-	}
-
-	var to = data.to || null;
-	if (!to){
-		throw new Error(Resources.Strings.ERROR_NO_TO);
-	}
-	if (to.length > Settings.MAX_USERNAME_SIZE){
-		throw new Error(Resources.Strings.ERROR_EXCEEDED_USERNAME);
-	}
-
-	if (Resources.Regex.TO_ROOM.test(to)){
-		var roomName = Resources.Regex.TO_ROOM.exec(to)[1];
-
-		broadcast(socket, metadata, roomName, {
+	if (Resources.Regex.TO.test(to)){
+		var roomName = Resources.Regex.TO.exec(to)[3];
+		var room = State.getRoom(roomName); //Will be created if doesn't already exist
+		broadcast(room, socket, metadata, {
 			from:from,
-			to:`room:${roomName}`,
 			content:content
 		});
 		return;
 	}
 
-	throw new Error(Resources.Strings.ERROR_INVALID_TO);
+	throw new RequestError(Resources.Strings.ERROR_INVALID_TO);
 }
 
 function caseJoin(socket, metadata, data){
-	var from = data.from || null;
-	if (!from){
-		throw new Error(Resources.Strings.ERROR_NO_FROM);
-	}
-	if (from.length > Settings.MAX_USERNAME_SIZE){
-		throw new Error(Resources.Strings.ERROR_EXCEEDED_USERNAME);
-	}
-	const ANONYMOUS = Resources.Strings.ANONYMOUS;
-	if (from.toLowerCase() == ANONYMOUS.toLowerCase()){
-		from = `${ANONYMOUS}-{0}`.format(metadata.num);
-	} else {
-		//TODO
-	}
-
-	var to = data.to || null;
-	if (!to){
-		throw new Error(Resources.Strings.ERROR_NO_TO);
-	}
-	if (to.length > Settings.MAX_USERNAME_SIZE){
-		throw new Error(Resources.Strings.ERROR_EXCEEDED_USERNAME);
-	}
+	var to = validateTo(data.to);
 
 	var room = State.getRoom(to);
 	room.members.push(socket);
@@ -199,20 +162,69 @@ function caseJoin(socket, metadata, data){
 	}), metadata);
 }
 
-function handle_message_error(socket, err, debugObj){
-	socket.terminate();
-	ErrorHandler.handler_invalid_message(err, debugObj);
+//Validates "from" and returns value
+function validateFrom(from, required){
+	from = from || null;
+	required = required !== false;
+
+	if (!from && required){
+		throw new RequestError(Resources.Strings.ERROR_NO_FROM);
+	}
+	if (from.length > Settings.MAX_USERNAME_SIZE){
+		throw new RequestError(Resources.Strings.ERROR_EXCEEDED_USERNAME);
+	}
+	if (!Resources.Regex.USERNAME.test(from)){
+		throw new RequestError(Resources.Strings.ERROR_INVALID_FROM);
+	}
+
+	const ANONYMOUS = Resources.Strings.ANONYMOUS;
+	if (from.toLowerCase() == ANONYMOUS.toLowerCase()){
+		return `${ANONYMOUS}-{0}`;
+	}
+
+	//TODO: Validate digital signature for "from" username
+	//For now lets throw an error
+	throw new RequestError(Resources.Strings.ERROR_INVALID_FROM);
+
+	return from;
 }
 
-function broadcast(fromSocket, metadata, roomName, data){
-	//TODO: Channels
+function validateTo(to, required){
+	to = to || null;
+	required = required !== false;
 
-	var dataObj = Protocol.create(Protocol.MSG, data);
+	if (!to && required){
+		throw new RequestError(Resources.Strings.ERROR_NO_TO);
+	}
+	if (to.length > Settings.MAX_USERNAME_SIZE){
+		throw new RequestError(Resources.Strings.ERROR_EXCEEDED_USERNAME);
+	}
+	if (!Resources.Regex.TO.test(to)){
+		throw new RequestError(Resources.Strings.ERROR_INVALID_TO);
+	}
 
-	var room = State.getRoom(roomName);
+	return to;
+}
+
+function validateContent(content, required){
+	content = content || null;
+	required = required !== false;
+
+	if (!content && required){
+		throw new RequestError(Resources.Strings.ERROR_NO_CONTENT);
+	}
+	if (content.length > Settings.MAX_CONTENT_SIZE){
+		throw new RequestError(Resources.Strings.ERROR_INVALID_CONTENT);
+	}
+
+	return content;
+}
+
+function broadcast(room, fromSocket, fromSocketMetadata, data){
+	var dataObj = Protocol.create(Protocol.MSG, Object.assign({to:`room:${room.name}`}, data));
 	room.members.forEach((socket) => {
 		if (fromSocket.connectionId == socket.connectionId){
-			Send(socket, Protocol.create(Protocol.MSG, Object.assign({self:true}, data)), metadata);
+			Send(socket, Protocol.create(Protocol.MSG, Object.assign({self:true}, data)), fromSocketMetadata);
 		} else {
 			Send(socket, dataObj);
 		}

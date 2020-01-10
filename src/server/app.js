@@ -10,7 +10,7 @@ const WebSocketServer = require("ws").Server;
 const BodyParser = require("body-parser");
 const UUID = require("node-uuid");
 
-const ErrorHandler = require("./global/error-handler");
+const ErrorHandler = require("./errors/error-handler");
 const Settings = require("./global/settings");
 const Log = require("./utils/log");
 const Resources = require("./resources");

@@ -15,12 +15,12 @@ module.exports = (function(){
 		},
 
 		getRoom:function(name){
-			name = name.toLowerCase();
+			var nameLower = name.toLowerCase();
 
-			var room = rooms[name] || null;
+			var room = rooms[nameLower] || null;
 			if (!room){
 				room = new Models.Room(name);
-				rooms[name] = room;
+				rooms[nameLower] = room;
 			}
 			return room;
 		},

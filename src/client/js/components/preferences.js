@@ -127,7 +127,7 @@
 		script.id = buildScriptId(cipher.name);
 
 		//Is source a URL?
-		if (Helpers.RegexPatterns.URL_JS.test(cipher.source)){
+		if (Resources.Regex.URL_JS.test(cipher.source)){
 			script.src = cipher.source;
 		} else {
 			script.innerHTML = cipher.source;

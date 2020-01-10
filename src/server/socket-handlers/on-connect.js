@@ -1,8 +1,6 @@
 const State = require.main.require("./global/state");
 const Settings = require.main.require("./global/settings");
 const Resources = require.main.require("./resources");
-const Send = require.main.require("./socket-handlers/send");
-const Protocol = require.main.require("../shared/js/models/protocol");
 const Models = require.main.require("./models");
 
 module.exports = function(evt, context, callback){

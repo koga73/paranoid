@@ -28,13 +28,14 @@
 	);
 
 	function send(socket, msg){
-		socket.metadata.seqFromClient++;
+		var metadata = socket.metadata;
+		metadata.seqFromClient++;
 
-		if (socket.metadata.state != Models.SocketMetadata.STATE.KEY){
+		if (metadata.state != Models.SocketMetadata.STATE.KEY){
 			//Encrypt
-			var iv = Helpers.Crypto.computeIV(socket.metadata.iv, Helpers.Crypto.IV_FIXED_CLIENT, socket.metadata.seqFromClient);
-			var key = socket.metadata.key;
-			//console.log("SEND:", socket.metadata.seqFromClient, buf2hex(iv));
+			var iv = Helpers.Crypto.computeIV(metadata.iv, Helpers.Crypto.IV_FIXED_CLIENT, metadata.seqFromClient);
+			var key = metadata.key;
+			//console.log("SEND:", metadata.seqFromClient, buf2hex(iv));
 			Helpers.Crypto.encrypt(iv, key, msg)
 				.then(function(ciphertext){
 					//Send

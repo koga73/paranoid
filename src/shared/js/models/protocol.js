@@ -12,16 +12,11 @@
 	creationContext({
 		TYPE:_TYPE,
 
-
 		//System
 		KEY:{
 			type:_TYPE.SYSTEM,
 			code:100,
 			content:null
-		},
-		READY:{
-			type:_TYPE.SYSTEM,
-			code:110,
 		},
 		WELCOME:{
 			type:_TYPE.SYSTEM,
@@ -38,13 +33,9 @@
 		},
 
 		//User
-		MSG:{
+		READY:{
 			type:_TYPE.USER,
 			code:200,
-			from:null,
-			to:null,
-			content:null,
-			self:false
 		},
 		JOIN:{
 			type:_TYPE.USER,
@@ -52,6 +43,14 @@
 			from:null,
 			to:null,
 			content:"join"
+		},
+		MSG:{
+			type:_TYPE.USER,
+			code:220,
+			from:null,
+			to:null,
+			content:null,
+			self:false
 		},
 
 		create:function(payload, params){
