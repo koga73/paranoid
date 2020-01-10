@@ -7,12 +7,20 @@ module.exports = function(evt, context, callback){
 	callback = callback || null;
 
 	var socket = evt.requestContext;
+	var metadata = State.getSocketMetadata(socket.connectionId);
 	if (Settings.DEBUG){
 		console.info(Resources.Strings.CLIENT_DISCONNECTED.format(socket.connectionId));
 	}
 
+	metadata.rooms.forEach((roomName, index) => {
+		var room = State.getRoom(roomName);
+		var memberIndex = room.members.indexOf(socket);
+		if (memberIndex != -1){
+			room.members.splice(memberIndex, 1);
+		}
+		metadata.rooms.splice(index, 1);
+	});
 	State.removeSocketMetadata(socket.connectionId);
-	//TODO: Remove socket from room!
 
 	if (callback){
 		callback(null, {

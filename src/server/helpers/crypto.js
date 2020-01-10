@@ -81,6 +81,7 @@ var _class = {
 		return Promise.resolve(fixedVal);
 	}
 };
+//TODO: Make dynamic? Based on room?
 _class.getIVFixed("client").then(function(code){
 	_class.IV_FIXED_CLIENT = code;
 });

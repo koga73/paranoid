@@ -22,6 +22,7 @@ var _class = function(params){
 		seqFromRelay:0,
 		seqFromClient:0,
 		state:STATE.KEY,
+		rooms:[], //List of room names the socket is a member of
 
 		//Returns true if code is valid for state
 		validate:function(code){

@@ -152,14 +152,17 @@ function caseJoin(socket, metadata, data){
 	var to = validateTo(data.to);
 
 	var room = State.getRoom(to);
-	room.members.push(socket);
 	var roomName = room.name;
+	if (metadata.rooms.indexOf(roomName) == -1){
+		metadata.rooms.push(roomName);
+		room.members.push(socket);
 
-	Send(socket, Protocol.create(Protocol.ROOM, {
-		content:Protocol.ROOM.content.format(roomName),
-		name:roomName,
-		members:room.members.length
-	}), metadata);
+		Send(socket, Protocol.create(Protocol.ROOM, {
+			content:Protocol.ROOM.content.format(roomName),
+			name:roomName,
+			members:room.members.length
+		}), metadata);
+	}
 }
 
 //Validates "from" and returns value
