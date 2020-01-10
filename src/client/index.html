@@ -275,7 +275,7 @@
 						<div class="clr">
 							<div class="left">
 								<h2>Chat{{(contextName) ? " - " + contextName : ""}}</h2>
-								<div class="scroll-wrap">
+								<div ref="messages-scroll" class="scroll-wrap">
 									<ol class="messages">
 										<li v-for="message in messages" v-bind:class="['clr', message.type, {self:message.self === true}]">
 											<span class="from">
@@ -288,7 +288,7 @@
 									</ol>
 								</div>
 							</div>
-							<div class="right">
+							<aside class="right">
 								<div class="top">
 									<div class="clr">
 										<h3 class="left">Rooms</h3>
@@ -314,14 +314,14 @@
 										</ul>
 									</div>
 								</div>
-							</div>
+							</aside>
 						</div>
 						<form ref="frmChat" class="clr">
 							<div class="left">
 								<div class="message">
 									<div class="input-wrap">
 										<label for="txtMessage" class="seo">Message</label>
-										<input type="text" id="txtMessage" v-model="message" placeholder="Message" required minlength="1" maxlength="255" autocomplete="off"/>
+										<input ref="txtMessage" type="text" id="txtMessage" v-model="message" placeholder="Message" required minlength="1" maxlength="255" autocomplete="off"/>
 									</div>
 									<div class="btn-wrap">
 										<button type="submit" class="btn" v-on:click="handler_message_send($event)">Send</button>

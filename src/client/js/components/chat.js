@@ -124,6 +124,8 @@
 		mounted:function(){
 			this.account = this.accounts[0];
 			this.username = this.account.username;
+
+			this.$refs["txtMessage"].focus();
 		},
 		methods:{
 			connect:function(relay){
@@ -171,7 +173,17 @@
 							_this.roomChangeHack=1;
 						}
 						if (socket.metadata.state != Models.SocketMetadata.STATE.KEY){
+							var scrolledBottom = _this.isMessagesScrolledBottom();
+							console.log(scrolledBottom);
+
 							_this.messages.push(data.msg);
+
+							//If we are scrolled to bottom, add message then scroll again
+							if (scrolledBottom){
+								_this.$nextTick(function(){
+									_this.messagesScrollToBottom();
+								});
+							}
 						}
 					})
 					.catch(Global.ErrorHandler.caught)
@@ -198,6 +210,7 @@
 
 				SocketHandlers.Send(sockets, Protocol.MSG, this.username, this.context, this.message);
 				this.message = "";
+				this.$refs["txtMessage"].focus();
 
 				return false;
 			},
@@ -223,6 +236,16 @@
 					return false;
 				}
 				return this.context.toLowerCase() == ("room:" + room.name).toLowerCase();
+			},
+
+			isMessagesScrolledBottom:function(){
+				var messagesScroll = this.$refs["messages-scroll"];
+				return messagesScroll.scrollTop - 2 == messagesScroll.scrollHeight - messagesScroll.offsetHeight; //2 for border
+			},
+
+			messagesScrollToBottom:function(){
+				var messagesScroll = this.$refs["messages-scroll"];
+				messagesScroll.scrollTop = messagesScroll.scrollHeight - messagesScroll.offsetHeight + 2; //2 for border
 			}
 		},
 		watch:{
