@@ -88,6 +88,8 @@
 													<button class="btn" v-on:click="handler_cipher_remove($event, cipher, index)" v-bind:disabled="cipher.fromServer" v-bind:title="(cipher.fromServer) ? 'This plugin was added by the server and cannot be removed' : 'Remove this cipher - To fully unload the cipher from memory you will need to refresh the page'">Remove</button>
 												</td>
 											</tr>
+											<!-- Disabled for now - This is more of a security hole than anything else. I'll probably end up removing this -->
+											<!--
 											<tr>
 												<td>
 													<div class="input-wrap">
@@ -114,6 +116,7 @@
 													<button class="btn" v-on:click="handler_cipher_loadDevice($event)" title="Load a cipher plugin from your device into your browser">Load from device</button>
 												</td>
 											</tr>
+											-->
 										</tbody>
 									</table>
 								</form>
@@ -327,12 +330,14 @@
 											<h3 class="left flex-grow">Rooms</h3>
 											<button class="right btn btn-new" v-on:click="handler_newRoom_click" title="New room">+</button>
 										</div>
-										<div class="scroll-wrap flex-grow">
-											<ul>
-												<li v-for="room in rooms">
-													<button v-bind:class="['btn btn-slim', {active:isRoomActive(room)}]" v-on:click="handler_room_click(room)">{{room.name}}</button>
-												</li>
-											</ul>
+										<div class="flex-grow">
+											<div class="scroll-wrap">
+												<ul>
+													<li v-for="room in rooms">
+														<button v-bind:class="['btn btn-slim', {active:isRoomActive(room)}]" v-on:click="handler_room_click(room)">{{room.name}}</button>
+													</li>
+												</ul>
+											</div>
 										</div>
 									</div>
 									<div class="flex-v">
@@ -340,11 +345,13 @@
 											<h3 class="left flex-grow">Direct Message</h3>
 											<button class="right btn btn-new" v-on:click="handler_newDirect_click" title="New direct message">+</button>
 										</div>
-										<div class="scroll-wrap flex-grow">
-											<p v-if="!users.length">No direct messages yet</p>
-											<ul v-if="users.length">
-												<li v-for="user in users">{{user.username}}</li>
-											</ul>
+										<div class="flex-grow">
+											<div class="scroll-wrap">
+												<p v-if="!users.length">No direct messages yet</p>
+												<ul v-if="users.length">
+													<li v-for="user in users">{{user.username}}</li>
+												</ul>
+											</div>
 										</div>
 									</div>
 								</aside>
@@ -400,18 +407,18 @@
 			"preferences":{
 				"ciphers":[
 					{
-						"name":"SHA-512",
-						"source":"/js/cipher-plugins/sha512.js",
+						"name":"SHA-256",
+						"source":"//Built into browser",
 						"type":"hash"
 					},
 					{
-						"name":"RSA-4096",
-						"source":"/js/cipher-plugins/rsa4096.js",
+						"name":"ECDH-521",
+						"source":"//Built into browser",
 						"type":"asymmetric"
 					},
 					{
-						"name":"AES-CBC-256",
-						"source":"/js/cipher-plugins/aes256.js",
+						"name":"AES-GCM-256",
+						"source":"//Built into browser",
 						"type":"symmetric"
 					}
 				]

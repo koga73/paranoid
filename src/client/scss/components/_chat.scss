@@ -67,8 +67,6 @@
 	.panel.left {
 		.scroll-wrap {
 			border:1px solid $color-secondary-1-0;
-			box-sizing:border-box;
-			height:100%;
 		}
 	}
 
@@ -76,6 +74,7 @@
 		& > .flex-v {
 			& > .flex-h {
 				width:200%;
+				max-width:200%;
 			}
 		}
 
