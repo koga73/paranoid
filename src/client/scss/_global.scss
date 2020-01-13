@@ -11,6 +11,7 @@ body {
 
 *::-webkit-scrollbar {
 	width:space(1);
+	height:space(1);
 }
 *::-webkit-scrollbar-track {
 	background-color:$color-scrollbar-track;
