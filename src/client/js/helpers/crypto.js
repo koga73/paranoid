@@ -99,6 +99,13 @@
 				}, false, []); //Not obvious but for chrome the usage array needs to be empty: https://stackoverflow.com/q/54179887/3610169
 			},
 
+			hash:function(phrase){
+				return crypto.subtle.digest(this.ALGORITHM_HASH, new TextEncoder().encode(phrase))
+					.then(function(hash){
+						return Promise.resolve(new Uint8Array(hash));
+					});
+			},
+
 			//GCM MUST NOT REUSE IV WITH SAME KEY
 			//Although GCM key length can be variable, 12-bit is recommended
 			//NIST SP-800-38D: 8.2.1 Deterministic Construction
@@ -130,9 +137,8 @@
 			//Hash the input and turn the first 4 bytes into a 32-bit number
 			//This doesn't need to be super unique as this value will get XOR'd with randomBytes
 			getIVFixed:function(phrase){
-				return crypto.subtle.digest(this.ALGORITHM_HASH, new TextEncoder().encode(phrase))
+				return this.hash(phrase)
 					.then(function(hash){
-						hash = new Uint8Array(hash);
 						var fixedVal = 0;
 						fixedVal |= hash[0] << 0;
 						fixedVal |= hash[1] << 8;

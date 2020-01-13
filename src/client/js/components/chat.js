@@ -135,8 +135,9 @@
 			connect:function(relay){
 				var socket = new WebSocket(relay.address);
 				socket.metadata = new Models.SocketMetadata({
-					name:relay.name
-				})
+					name:relay.name,
+					relay:relay
+				});
 				socket.onopen = this.handler_socket_open;
 				socket.onclose = this.handler_socket_close;
 				socket.onmessage = this.handler_socket_message;

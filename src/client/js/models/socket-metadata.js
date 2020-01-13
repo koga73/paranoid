@@ -13,7 +13,8 @@
 			key:null,
 			seqFromRelay:0,
 			seqFromClient:0,
-			state:STATE.KEY
+			state:STATE.KEY,
+			relay:null
 		},
 
 		static:{

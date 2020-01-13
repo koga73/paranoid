@@ -257,6 +257,10 @@ table {
 		vertical-align:middle;
 	}
 
+	td {
+		white-space:nowrap;
+	}
+
 	tr:nth-child(even){
 		background-color:$color-secondary-2-1;
 	}

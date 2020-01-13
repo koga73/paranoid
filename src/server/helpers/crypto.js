@@ -1,5 +1,6 @@
 const crypto = require("crypto");
 
+const Settings = require.main.require("./global/settings");
 const Strings = require.main.require("./resources/strings");
 
 var _class = {
@@ -34,12 +35,27 @@ var _class = {
 	generateKeyAsym:function(clientPublicKey){
 		var ecdh = crypto.createECDH(this.NAMED_CURVE);
 		ecdh.generateKeys();
+
 		var sharedSecret = ecdh.computeSecret(clientPublicKey, "hex");
+		var key = new Uint8Array(sharedSecret.slice(-this.KEY_LEN));
+
+		//XOR key with passphrase hash
+		if (Settings.PASSPHRASE && Settings.PASSPHRASE.length){
+			var hash = this.hash(Settings.PASSPHRASE);
+			var keyLen = key.byteLength;
+			for (var i = 0; i < keyLen; i++){
+				key[i] ^= hash[i]; //XOR with passphrase hash
+			}
+		}
 		return {
 			publicKey:ecdh.getPublicKey("hex"),
 			iv:sharedSecret.slice(0, this.IV_LEN),
-			key:sharedSecret.slice(-this.KEY_LEN)
+			key:Buffer.from(key)
 		};
+	},
+
+	hash:function(phrase){
+		return new Uint8Array(crypto.createHash(this.ALGORITHM_HASH).update(phrase).digest().buffer);
 	},
 
 	//GCM MUST NOT REUSE IV WITH SAME KEY
@@ -72,7 +88,7 @@ var _class = {
 	//Hash the input and turn the first 4 bytes into a 32-bit number
 	//This doesn't need to be super unique as this value will get XOR'd with randomBytes
 	getIVFixed:function(phrase){
-		var hash = new Uint8Array(crypto.createHash(this.ALGORITHM_HASH).update(phrase).digest().buffer);
+		var hash = this.hash(phrase);
 		var fixedVal = 0;
 		fixedVal |= hash[0] << 0;
 		fixedVal |= hash[1] << 8;

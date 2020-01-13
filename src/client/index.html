@@ -142,6 +142,7 @@
 												<th>Enabled</th>
 												<th>Name</th>
 												<th>Address</th>
+												<th>Passphrase</th>
 												<th>Actions</th>
 											</tr>
 										</thead>
@@ -157,6 +158,8 @@
 												</td>
 												<td>{{relay.name}}</td>
 												<td>{{relay.address}}</td>
+												<!-- TODO: Hide? -->
+												<td>{{relay.passphrase}}</td>
 												<td>
 													<button class="btn" v-on:click="handler_relay_remove($event, relay, index)" v-bind:disabled="relay.fromServer" v-bind:title="(relay.fromServer) ? 'This relay was added by the server and cannot be removed' : 'Remove this relay from your browser'">Remove</button>
 													<button class="btn" v-on:click="handler_relay_export($event, relay)" title="Export this relay to a downloadable json file">Export</button>
@@ -181,6 +184,12 @@
 													<div class="input-wrap">
 														<label for="txtRelayNewAddress" class="seo">URL or IP Address</label>
 														<input type="text" id="txtRelayNewAddress" v-model="relayNew.address" placeholder="URL or IP Address" required minlength="1" pattern="^[\w\/.:-]+$" autocomplete="off"/>
+													</div>
+												</td>
+												<td>
+													<div class="input-wrap">
+														<label for="txtRelayPassphrase" class="seo">Passphrase</label>
+														<input type="text" id="txtRelayPassphrase" v-model="relayNew.passphrase" placeholder="Passphrase" required minlength="1" autocomplete="off"/>
 													</div>
 												</td>
 												<td>

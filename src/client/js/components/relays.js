@@ -30,6 +30,7 @@
 						enabled:relay.enabled,
 						name:relay.name,
 						address:relay.address,
+						passphrase:relay.passphrase,
 						fromServer:true
 					}));
 				}

@@ -1,6 +1,6 @@
 (function(){
 	OOP.namespace("SocketHandlers.OnMessage",
-		function(evt, sockets, fromUsername){
+		function(evt, sockets, fromUsername, relayPassphrase){
 			var socket = evt.srcElement;
 			var metadata = socket.metadata;
 			metadata.seqFromRelay++;
@@ -24,7 +24,7 @@
 					switch (data.code){
 
 						case Protocol.KEY.code:
-							caseKey(socket, metadata, data);
+							caseKey(socket, metadata, data, relayPassphrase);
 							break;
 
 						case Protocol.WELCOME.code:
@@ -52,18 +52,31 @@
 
 		Helpers.Crypto.deriveSecretKey(metadata.keyPair.privateKey, publicKey)
 			.then(function(ivKey){
-				//console.log("IV:", Helpers.Crypto.buf2hex(ivKey.iv, " "));
-				//console.log("KEY:", Helpers.Crypto.buf2hex(ivKey.key, " "));
-
 				delete metadata.keyPair;
 				metadata.iv = ivKey.iv;
-				Helpers.Crypto.loadKeySymmetric(ivKey.key)
-					.then(function(loadedKey){
-						metadata.key = loadedKey;
-						metadata.state = Models.SocketMetadata.STATE.ESTABLISHED;
 
-						SocketHandlers.Send([socket], Protocol.READY);
-					});
+				var key = new Uint8Array(ivKey.key);
+				var hasRelayPassphrase = metadata.relay && metadata.relay.passphrase && metadata.relay.passphrase.length;
+				var promise = (hasRelayPassphrase) ? Helpers.Crypto.hash(metadata.relay.passphrase) : Promise.resolve(null);
+				promise.then(function(hash){
+					if (hasRelayPassphrase){
+						//XOR key with passphrase hash
+						var keyLen = key.byteLength;
+						for (var i = 0; i < keyLen; i++){
+							key[i] ^= hash[i];
+						}
+					}
+					//console.log("IV:", Helpers.Crypto.buf2hex(ivKey.iv, " "));
+					//console.log("KEY:", Helpers.Crypto.buf2hex(ivKey.key, " "));
+
+					Helpers.Crypto.loadKeySymmetric(key)
+						.then(function(loadedKey){
+							metadata.key = loadedKey;
+							metadata.state = Models.SocketMetadata.STATE.ESTABLISHED;
+
+							SocketHandlers.Send([socket], Protocol.READY);
+						});
+				});
 			})
 			.catch(Global.ErrorHandler.caught);
 	}
