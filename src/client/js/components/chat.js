@@ -109,8 +109,6 @@
 			rooms:function(){
 				this.roomChangeHack;
 
-				return new Array(100).fill({name:"test"});
-
 				//Filter duplicates
 				return Models.Room.rooms.reduce(function(roomNames, room){
 					if (roomNames.indexOf(room.name) == -1){
