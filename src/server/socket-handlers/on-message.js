@@ -1,4 +1,5 @@
 const Send = require.main.require("./socket-handlers/send");
+const Broadcast = require.main.require("./socket-handlers/broadcast");
 const ErrorHandler = require.main.require("./errors/error-handler");
 const RequestError = require.main.require("./errors/request-error");
 const Settings = require.main.require("./global/settings");
@@ -138,7 +139,7 @@ function caseMsg(socket, metadata, data){
 	if (Resources.Regex.TO.test(to)){
 		var roomName = Resources.Regex.TO.exec(to)[3];
 		var room = State.getRoom(roomName); //Will be created if doesn't already exist
-		broadcast(room, socket, metadata, {
+		Broadcast(room, socket, metadata, {
 			from:from,
 			content:content
 		});
@@ -221,15 +222,4 @@ function validateContent(content, required){
 	}
 
 	return content;
-}
-
-function broadcast(room, fromSocket, fromSocketMetadata, data){
-	var dataObj = Protocol.create(Protocol.MSG, Object.assign({to:`room:${room.name}`}, data));
-	room.members.forEach((socket) => {
-		if (fromSocket.connectionId == socket.connectionId){
-			Send(socket, Protocol.create(Protocol.MSG, Object.assign({self:true}, data)), fromSocketMetadata);
-		} else {
-			Send(socket, dataObj);
-		}
-	});
 }

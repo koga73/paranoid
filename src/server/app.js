@@ -15,11 +15,19 @@ const Settings = require("./global/settings");
 const Log = require("./utils/log");
 const Resources = require("./resources");
 const SocketHandlers = require("./socket-handlers");
+const Broadcast = require.main.require("./socket-handlers/broadcast");
+const State = require.main.require("./global/state");
 
 module.exports = (function(){
+	const CONSOLE_MODE = {
+		ROOM:"room"
+	};
+
 	var _vars = {
 		_server:null,
-		_socketServer:null
+		_socketServer:null,
+
+		_consoleMode:null
 	};
 
 	var _methods = {
@@ -125,6 +133,35 @@ module.exports = (function(){
 		//Console input
 		_handler_stdin_data:function(data){
 			var input = data.toString().trim();
+
+			switch (_vars._consoleMode){
+				case CONSOLE_MODE.ROOM:
+					if (input == ":q!"){
+						Settings.consoleContext = null;
+						_vars._consoleMode = null;
+
+						console.clear();
+						_methods._displayCommands();
+						return;
+					}
+					var roomName = Resources.Regex.CONTEXT_ROOM.exec(Settings.consoleContext)[2];
+					var room = State.getRoom(roomName); //Will be created if doesn't already exist
+					Broadcast(room, null, null, {
+						content:input
+					});
+					return;
+			}
+
+			//room:${room_name}
+			if (Resources.Regex.CONTEXT_ROOM.test(input)){
+				Settings.consoleContext = input.toLowerCase();
+				_vars._consoleMode = CONSOLE_MODE.ROOM;
+
+				console.clear();
+				console.log(Resources.Strings.CONSOLE_CONTEXT.format(Settings.consoleContext));
+				return;
+			}
+
 			switch (input){
 				case "end":
 				case "exit":
@@ -142,6 +179,9 @@ module.exports = (function(){
 				case "connections":
 					console.log(Resources.Strings.ACTIVE_CONNECTIONS.format(_methods.getClients().length));
 					break;
+				case "passphrase":
+					console.log(Settings.PASSPHRASE);
+					break;
 				case "?":
 				default:
 					_methods._displayCommands();
@@ -153,7 +193,7 @@ module.exports = (function(){
 			console.log();
 			console.log(Log.COLORS.BG.MAGENTA, Settings.NAME + " " + Settings.VERSION, Log.COLORS.SYSTEM.RESET);
 			console.log(Log.COLORS.BG.BLUE, "Commands:", Log.COLORS.SYSTEM.RESET, "[ end | exit ] [ reset ] [ cls | clear ]");
-			console.log("          ", Log.COLORS.SYSTEM.RESET, "[ connections ]");
+			console.log("          ", Log.COLORS.SYSTEM.RESET, "[ connections ] [ passphrase ] [ room:${room_name} ]");
 			console.log();
 			console.log();
 		}

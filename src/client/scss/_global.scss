@@ -26,20 +26,35 @@ body {
 	height:100vh;
 }
 
-.wrap {
+@mixin wrap {
     width:100%;
     max-width:$screen-xl;
     margin:auto;
     box-sizing:border-box;
 
     @include bp("xl"){
-        padding:0 space(3)
-    }
+        padding:0 space(2);
+	}
 }
+.wrap {
+	@include wrap;
+}
+@include bp("sm", "min"){
+	.wrap-large {
+		@include wrap;
+	}
+}
+@include bp("sm"){
+	.wrap-small {
+		@include wrap;
+	}
+}
+
 .scroll-wrap {
 	max-width:100%;
 	max-height:100%;
 	overflow:auto;
+	position:relative;
 }
 
 .component {
@@ -107,29 +122,33 @@ header {
 	box-sizing:border-box;
 	padding:space(1) 0;
 	border-bottom:1px solid $color-complement-0;
-	height:$header-height;
 
 	.logo {
 		float:left;
-		text-align:center;
+		margin:space(0.5) 0;
 
 		a {
 			text-decoration:none;
 			color:$color-primary-0;
+			display:inline-block;
 
 			&[download]{
 				text-decoration:underline;
+				width:space(2.5);
+				margin-left:space(1);
 			}
 		}
 	}
 
 	nav {
 		float:right;
-		margin-top:space(2.5);
+		margin-right:space(-1);
+		margin-top:2px;
 
 		ul {
 			& > li {
 				display:inline-block;
+				width:space(2.5);
 				margin:space(1);
 
 				a.active {
@@ -143,9 +162,7 @@ header {
 
 main {
 	width: 100%;
-	height:calc(#{100%} - #{$header-height + $footer-height});
 	box-sizing:border-box;
-	padding:space(2) 0;
 	overflow:auto;
 }
 
@@ -157,7 +174,6 @@ footer {
 	color:$color-secondary-1-4;
 	box-sizing:border-box;
 	padding:space(1) 0;
-	height:$footer-height;
 
 	.status {
 		cursor:help;
@@ -244,4 +260,28 @@ table {
 	tr:nth-child(even){
 		background-color:$color-secondary-2-1;
 	}
+}
+
+.flex-v {
+	display:flex;
+	flex-direction:column;
+	width:100%;
+	height:100%;
+}
+.flex-h {
+	display:flex;
+	flex-direction:row;
+	width:100%;
+	height:100%;
+}
+.flex-grow {
+	flex-grow:1;
+}
+.flex-center {
+	justify-content:center;
+}
+
+.fa-network-wired {
+	position:relative;
+	top:-2px;
 }

@@ -12,31 +12,43 @@
 		<link rel="stylesheet" href="css/styles.css" type="text/css"/>
 	</head>
 	<body>
-		<div id="page">
+		<div id="page" class="flex-v">
 			<header v-cloak>
 				<div class="wrap clr">
 					<div class="logo">
 						<a href="#" accesskey="0" v-bind:title="accessKeyShortcut + '0'">
 							<h1>Paranoid</h1>
 						</a>
-						<a href="paranoid-portable.html" target="_blank" download title="Download the stand-alone paranoid-portable.html - verify the file checksum and run locally by opening the downloaded file in your browser"><em>Portable</em></a>
+						<a href="paranoid-portable.html" target="_blank" download title="Download the stand-alone paranoid-portable.html - verify the file checksum and run locally by opening the downloaded file in your browser">
+							<em class="seo">Portable</em>
+							<svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="file-download" class="svg-inline--fa fa-file-download fa-w-12" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><path fill="currentColor" d="M224 136V0H24C10.7 0 0 10.7 0 24v464c0 13.3 10.7 24 24 24h336c13.3 0 24-10.7 24-24V160H248c-13.2 0-24-10.8-24-24zm76.45 211.36l-96.42 95.7c-6.65 6.61-17.39 6.61-24.04 0l-96.42-95.7C73.42 337.29 80.54 320 94.82 320H160v-80c0-8.84 7.16-16 16-16h32c8.84 0 16 7.16 16 16v80h65.18c14.28 0 21.4 17.29 11.27 27.36zM377 105L279.1 7c-4.5-4.5-10.6-7-17-7H256v128h128v-6.1c0-6.3-2.5-12.4-7-16.9z"></path></svg>
+						</a>
 					</div>
 					<nav>
 						<ul>
 							<li>
-								<a href="#preferences" v-bind:class="{active:route == 'preferences'}" accesskey="1" v-bind:title="accessKeyShortcut + '1'">Preferences</a>
+								<a href="#preferences" v-bind:class="{active:route == 'preferences'}" accesskey="1" v-bind:title="'Preferences | ' + accessKeyShortcut + '1'">
+									<span class="seo">Preferences</span>
+									<svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="cog" class="svg-inline--fa fa-cog fa-w-16" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M487.4 315.7l-42.6-24.6c4.3-23.2 4.3-47 0-70.2l42.6-24.6c4.9-2.8 7.1-8.6 5.5-14-11.1-35.6-30-67.8-54.7-94.6-3.8-4.1-10-5.1-14.8-2.3L380.8 110c-17.9-15.4-38.5-27.3-60.8-35.1V25.8c0-5.6-3.9-10.5-9.4-11.7-36.7-8.2-74.3-7.8-109.2 0-5.5 1.2-9.4 6.1-9.4 11.7V75c-22.2 7.9-42.8 19.8-60.8 35.1L88.7 85.5c-4.9-2.8-11-1.9-14.8 2.3-24.7 26.7-43.6 58.9-54.7 94.6-1.7 5.4.6 11.2 5.5 14L67.3 221c-4.3 23.2-4.3 47 0 70.2l-42.6 24.6c-4.9 2.8-7.1 8.6-5.5 14 11.1 35.6 30 67.8 54.7 94.6 3.8 4.1 10 5.1 14.8 2.3l42.6-24.6c17.9 15.4 38.5 27.3 60.8 35.1v49.2c0 5.6 3.9 10.5 9.4 11.7 36.7 8.2 74.3 7.8 109.2 0 5.5-1.2 9.4-6.1 9.4-11.7v-49.2c22.2-7.9 42.8-19.8 60.8-35.1l42.6 24.6c4.9 2.8 11 1.9 14.8-2.3 24.7-26.7 43.6-58.9 54.7-94.6 1.5-5.5-.7-11.3-5.6-14.1zM256 336c-44.1 0-80-35.9-80-80s35.9-80 80-80 80 35.9 80 80-35.9 80-80 80z"></path></svg>
+								</a>
 							</li>
 							<li>
-								<a href="#relays" v-bind:class="{active:route == 'relays'}" accesskey="2" v-bind:title="accessKeyShortcut + '2'">Relays</a>
+								<a href="#relays" v-bind:class="{active:route == 'relays'}" accesskey="2" v-bind:title="'Relays | ' + accessKeyShortcut + '2'">
+									<span class="seo">Relays</span>
+									<svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="network-wired" class="svg-inline--fa fa-network-wired fa-w-20" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512"><path fill="currentColor" d="M640 264v-16c0-8.84-7.16-16-16-16H344v-40h72c17.67 0 32-14.33 32-32V32c0-17.67-14.33-32-32-32H224c-17.67 0-32 14.33-32 32v128c0 17.67 14.33 32 32 32h72v40H16c-8.84 0-16 7.16-16 16v16c0 8.84 7.16 16 16 16h104v40H64c-17.67 0-32 14.33-32 32v128c0 17.67 14.33 32 32 32h160c17.67 0 32-14.33 32-32V352c0-17.67-14.33-32-32-32h-56v-40h304v40h-56c-17.67 0-32 14.33-32 32v128c0 17.67 14.33 32 32 32h160c17.67 0 32-14.33 32-32V352c0-17.67-14.33-32-32-32h-56v-40h104c8.84 0 16-7.16 16-16zM256 128V64h128v64H256zm-64 320H96v-64h96v64zm352 0h-96v-64h96v64z"></path></svg>
+								</a>
 							</li>
 							<li>
-								<a href="#accounts" v-bind:class="{active:route == 'accounts'}" accesskey="3" v-bind:title="accessKeyShortcut + '3'">Accounts</a>
+								<a href="#accounts" v-bind:class="{active:route == 'accounts'}" accesskey="3" v-bind:title="'Accounts | ' + accessKeyShortcut + '3'">
+									<span class="seo">Accounts</span>
+									<svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="user-circle" class="svg-inline--fa fa-user-circle fa-w-16" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><path fill="currentColor" d="M248 8C111 8 0 119 0 256s111 248 248 248 248-111 248-248S385 8 248 8zm0 96c48.6 0 88 39.4 88 88s-39.4 88-88 88-88-39.4-88-88 39.4-88 88-88zm0 344c-58.7 0-111.3-26.6-146.5-68.2 18.8-35.4 55.6-59.8 98.5-59.8 2.4 0 4.8.4 7.1 1.1 13 4.2 26.6 6.9 40.9 6.9 14.3 0 28-2.7 40.9-6.9 2.3-.7 4.7-1.1 7.1-1.1 42.9 0 79.7 24.4 98.5 59.8C359.3 421.4 306.7 448 248 448z"></path></svg>
+								</a>
 							</li>
 						</ul>
 					</nav>
 				</div>
 			</header>
-			<main v-cloak>
+			<main class="flex-grow" v-cloak>
 
 				<preferences inline-template v-bind:_ciphers.sync="ciphers" v-bind:class="['component', {active:route == 'preferences'}]">
 					<section id="preferences">
@@ -270,73 +282,93 @@
 					</section>
 				</accounts>
 
-				<chat inline-template v-bind:ciphers="ciphers" v-bind:relays="relays" v-bind:accounts="accounts" v-bind:_num-connected.sync="numConnected" v-bind:_total-connections.sync="totalConnections" v-bind:_connection-summary.sync="connectionSummary" v-bind:class="['component', {active:route == ''}]">
-					<section id="chat" class="wrap">
-						<div class="clr">
-							<div class="left">
-								<h2>Chat{{(contextName) ? " - " + contextName : ""}}</h2>
-								<div ref="messages-scroll" class="scroll-wrap">
-									<ol class="messages">
-										<li v-for="message in messages" v-bind:class="['clr', message.type, {self:message.self === true}]">
-											<span class="from">
-												<span class="seo">From</span>{{message.type == "user" ? message.from : "system"}}
-											</span>
-											<span class="content">
-												{{message.content}}
-											</span>
-										</li>
-									</ol>
+				<chat
+					inline-template
+					v-bind:ciphers="ciphers"
+					v-bind:relays="relays"
+					v-bind:accounts="accounts"
+					v-bind:_num-connected.sync="numConnected"
+					v-bind:_total-connections.sync="totalConnections"
+					v-bind:_connection-summary.sync="connectionSummary"
+					v-bind:class="['component', {active:route == ''}]">
+					<section id="chat" class="wrap-large">
+
+						<div class="flex-v scroll-wrap">
+							<div class="top flex-grow flex-h">
+								<div class="left wrap-small flex-v panel">
+									<h2>Chat{{(contextName) ? " - " + contextName : ""}}</h2>
+									<div class="flex-grow">
+										<div ref="messages-scroll" class="scroll-wrap">
+											<ol class="messages">
+												<li v-for="message in messages" v-bind:class="['clr', message.type, {self:message.self === true}]">
+													<span class="from">
+														<span class="seo">From</span>{{message.type == "user" ? message.from : "system"}}
+													</span>
+													<span class="content">
+														{{message.content}}
+													</span>
+												</li>
+											</ol>
+										</div>
+									</div>
 								</div>
+								<aside class="right wrap-small flex-v panel">
+									<div class="flex-v">
+										<div class="flex-h">
+											<h3 class="left flex-grow">Rooms</h3>
+											<button class="right btn btn-new" v-on:click="handler_newRoom_click" title="New room">+</button>
+										</div>
+										<div class="scroll-wrap flex-grow">
+											<ul>
+												<li v-for="room in rooms">
+													<button v-bind:class="['btn btn-slim', {active:isRoomActive(room)}]" v-on:click="handler_room_click(room)">{{room.name}}</button>
+												</li>
+											</ul>
+										</div>
+									</div>
+									<div class="flex-v">
+										<div class="flex-h">
+											<h3 class="left flex-grow">Direct Message</h3>
+											<button class="right btn btn-new" v-on:click="handler_newDirect_click" title="New direct message">+</button>
+										</div>
+										<div class="scroll-wrap flex-grow">
+											<p v-if="!users.length">No direct messages yet</p>
+											<ul v-if="users.length">
+												<li v-for="user in users">{{user.username}}</li>
+											</ul>
+										</div>
+									</div>
+								</aside>
 							</div>
-							<aside class="right">
-								<div class="top">
-									<div class="clr">
-										<h3 class="left">Rooms</h3>
-										<button class="right btn btn-new" v-on:click="handler_newRoom_click" title="New room">+</button>
-									</div>
-									<div class="scroll-wrap">
-										<ul>
-											<li v-for="room in rooms">
-												<button v-bind:class="['btn btn-slim', {active:isRoomActive(room)}]" v-on:click="handler_room_click(room)">{{room.name}}</button>
-											</li>
-										</ul>
-									</div>
-								</div>
-								<div class="bottom">
-									<div class="clr">
-										<h3 class="left">Direct Message</h3>
-										<button class="right btn btn-new" v-on:click="handler_newDirect_click" title="New direct message">+</button>
-									</div>
-									<div class="scroll-wrap">
-										<p v-if="!users.length">No direct messages yet</p>
-										<ul v-if="users.length">
-											<li v-for="user in users">{{user.username}}</li>
-										</ul>
+
+							<form ref="frmChat" class="bottom flex-h">
+								<div class="left wrap-small flex-h panel">
+									<div class="message-input flex-grow flex-h">
+										<div class="left flex-grow input-wrap">
+											<label for="txtMessage" class="seo">Message</label>
+											<textarea ref="txtMessage" id="txtMessage" v-model="message" placeholder="Message" required minlength="1" maxlength="255" autocomplete="off"></textarea>
+										</div>
+										<div class="right btn-wrap flex-v flex-center">
+											<button type="submit" class="btn btn-icon" v-on:click="handler_message_send($event)">
+												<span class="seo">Send</span>
+												<svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="arrow-circle-right" class="svg-inline--fa fa-arrow-circle-right fa-w-16" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M256 8c137 0 248 111 248 248S393 504 256 504 8 393 8 256 119 8 256 8zm-28.9 143.6l75.5 72.4H120c-13.3 0-24 10.7-24 24v16c0 13.3 10.7 24 24 24h182.6l-75.5 72.4c-9.7 9.3-9.9 24.8-.4 34.3l11 10.9c9.4 9.4 24.6 9.4 33.9 0L404.3 273c9.4-9.4 9.4-24.6 0-33.9L271.6 106.3c-9.4-9.4-24.6-9.4-33.9 0l-11 10.9c-9.5 9.6-9.3 25.1.4 34.4z"></path></svg>
+											</button>
+										</div>
 									</div>
 								</div>
-							</aside>
+								<aside class="right wrap-small panel">
+									<div class="select-wrap flex-h">
+										<div class="flex-v flex-center">
+											<label for="sltUsername">Send as:</label>
+										</div>
+										<select id="sltUsername" class="flex-grow" v-model="username" v-on:change="handler_username_change">
+											<option v-for="account in accounts" v-bind:value="account.username">{{account.username}}</option>
+										</select>
+									</div>
+								</aside>
+							</form>
 						</div>
-						<form ref="frmChat" class="clr">
-							<div class="left">
-								<div class="message">
-									<div class="input-wrap">
-										<label for="txtMessage" class="seo">Message</label>
-										<input ref="txtMessage" type="text" id="txtMessage" v-model="message" placeholder="Message" required minlength="1" maxlength="255" autocomplete="off"/>
-									</div>
-									<div class="btn-wrap">
-										<button type="submit" class="btn" v-on:click="handler_message_send($event)">Send</button>
-									</div>
-								</div>
-							</div>
-							<div class="right">
-								<div class="select-wrap">
-									<label for="sltUsername">Send as:</label>
-									<select id="sltUsername" v-model="username" v-on:change="handler_username_change">
-										<option v-for="account in accounts" v-bind:value="account.username">{{account.username}}</option>
-									</select>
-								</div>
-							</div>
-						</form>
+
 					</section>
 				</chat>
 
@@ -345,7 +377,9 @@
 				<div class="wrap">
 					<p class="status" v-bind:title="connectionSummary">{{numConnected ? "CONNECTED: " + Math.floor(numConnected / totalConnections * 100) + "%" : "DISCONNECTED"}}</p>
 					<!-- TODO: This should download from the relay rather than github to ensure mirrors -->
-					<a href="https://github.com/koga73/paranoid/releases" target="_blank">Download source code</a>
+					<a href="https://github.com/koga73/paranoid/releases" target="_blank" title="Download Source Code">
+						<span>Source code</span>
+					</a>
 				</div>
 			</footer>
 		</div>
@@ -377,7 +411,8 @@
 				{
 					"enabled":true,
 					"name":"localhost",
-					"address":"ws://localhost:8888"
+					"address":"ws://localhost:8888",
+					"passphrase":"#pjY5?p.qZ+U;E!nF72W]p*C"
 				}
 			]
 		};

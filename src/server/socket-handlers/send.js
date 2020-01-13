@@ -1,6 +1,7 @@
 const Settings = require.main.require("./global/settings");
 const State = require.main.require("./global/state");
 const CryptoHelper = require.main.require("./helpers/crypto");
+const Resources = require.main.require("./resources");
 
 module.exports = async function(socket, data, metadata, encrypt){
 	metadata = metadata || State.getSocketMetadata(socket.connectionId);

@@ -40,7 +40,16 @@ button {
 		padding:space(1);
 		font-size:1.5em;
 		line-height:0.5em;
-		margin:space(1.5) 0 0 0;
+		margin:space(1.5) 0;
+	}
+
+	&.btn-icon {
+		padding:0;
+		width:space(3);
+		height:space(3);
+		border-radius:space(3);
+		background:$color-secondary-1-0;
+		color:$color-secondary-2-0;
 	}
 }
 .btn-wrap {
@@ -189,6 +198,7 @@ span.error {
 		border:1px solid $color-secondary-1-0;
 		background-color:$color-form-bg;
 		color:$color-white;
+		max-width:100%;
 
         //Validation
         &.error:not(:valid) {
@@ -220,10 +230,9 @@ span.error {
     }
 
     textarea {
-        display:block;
-		min-width:320px;
+		display:block;
+		width:100%;
 		min-height:34px;
-		width:320px;
 		height:34px;
 
         @include bp('sm') {

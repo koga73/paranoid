@@ -35,5 +35,8 @@ module.exports = {
 
 	//Protocol strings
 	PROTOCOL_WELCOME:`Connected to ${Settings.NAME} ${Settings.VERSION}`,
-	PROTOCOL_ROOM:`Joined room {0}`
+	PROTOCOL_ROOM:"Joined room {0}",
+
+	//Console strings
+	CONSOLE_CONTEXT:`Joined {0} | Type ":q!" to leave`
 };

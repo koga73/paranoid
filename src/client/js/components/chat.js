@@ -109,6 +109,8 @@
 			rooms:function(){
 				this.roomChangeHack;
 
+				return new Array(100).fill({name:"test"});
+
 				//Filter duplicates
 				return Models.Room.rooms.reduce(function(roomNames, room){
 					if (roomNames.indexOf(room.name) == -1){
@@ -125,7 +127,9 @@
 			this.account = this.accounts[0];
 			this.username = this.account.username;
 
-			this.$refs["txtMessage"].focus();
+			var txtMessage = this.$refs["txtMessage"];
+			txtMessage.focus();
+			txtMessage.addEventListener("keydown", this.handler_message_keydown);
 		},
 		methods:{
 			connect:function(relay){
@@ -174,7 +178,6 @@
 						}
 						if (socket.metadata.state != Models.SocketMetadata.STATE.KEY){
 							var scrolledBottom = _this.isMessagesScrolledBottom();
-							console.log(scrolledBottom);
 
 							_this.messages.push(data.msg);
 
@@ -187,6 +190,20 @@
 						}
 					})
 					.catch(Global.ErrorHandler.caught)
+			},
+
+			handler_options_click:function(){
+				console.log("chat::handler_options_click");
+			},
+
+			handler_message_keydown:function(evt){
+				switch (evt.keyCode){
+					case 13:
+						if (!evt.shiftKey){
+							this.handler_message_send(evt);
+						}
+						break;
+				}
 			},
 
 			handler_message_send:function(evt){

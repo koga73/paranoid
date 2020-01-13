@@ -6,6 +6,7 @@
 			enabled:true,
 			name:"",
 			address:"",
+			passphrase:"",
 			fromServer:false
         },
 

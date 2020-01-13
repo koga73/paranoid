@@ -20,16 +20,22 @@
 		},
 		WELCOME:{
 			type:_TYPE.SYSTEM,
-			code:120,
+			code:110,
 			content:Strings.PROTOCOL_WELCOME || null,
 			room:Strings.DEFAULT_ROOM
 		},
 		ROOM:{
 			type:_TYPE.SYSTEM,
-			code:110,
+			code:120,
 			content:Strings.PROTOCOL_ROOM || null,
 			name:null,
 			members:0
+		},
+		SYS_MSG:{
+			type:_TYPE.SYSTEM,
+			code:130,
+			to:null,
+			content:null
 		},
 
 		//User
