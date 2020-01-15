@@ -60,6 +60,7 @@ const config = {
 				src + "client/js/components/preferences.js",
 				src + "client/js/components/relays.js",
 				src + "client/js/components/accounts.js",
+				src + "client/js/components/message.js",
 				src + "client/js/components/chat.js",
 				src + "client/js/page.js"
 			],

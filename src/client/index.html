@@ -312,14 +312,16 @@
 									<div class="flex-grow">
 										<div ref="messages-scroll" class="scroll-wrap">
 											<ol class="messages">
-												<li v-for="message in messages" v-bind:class="['clr', message.type, {self:message.self === true}]">
-													<span class="from">
-														<span class="seo">From</span>{{message.type == "user" ? message.from : "system"}}
-													</span>
-													<span class="content">
-														{{message.content}}
-													</span>
-												</li>
+												<message inline-template v-for="message in messages" v-bind:message="message">
+													<li v-bind:class="['clr', message.type, {self:message.self === true}]">
+														<span class="from">
+															<span class="seo">From</span>{{message.type == "user" ? message.from : "system"}}
+														</span>
+														<span class="content">
+															{{content}}
+														</span>
+													</li>
+												</message>
 											</ol>
 										</div>
 									</div>

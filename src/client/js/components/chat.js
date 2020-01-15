@@ -154,7 +154,7 @@
 						SocketHandlers.Send(sockets, Protocol.KEY, null, null, keyPair.publicKey);
 					})
 					.catch(Global.ErrorHandler.caught);
-;			},
+			},
 
 			handler_socket_close:function(evt){
 				console.log("chat::handler_socket_close", evt);
@@ -178,7 +178,9 @@
 						if (socket.metadata.state != Models.SocketMetadata.STATE.KEY){
 							var scrolledBottom = _this.isMessagesScrolledBottom();
 
-							_this.messages.push(data.msg);
+							_this.messages.push(Object.assign({}, data.msg, {
+								raw:evt.data
+							}));
 
 							//If we are scrolled to bottom, add message then scroll again
 							if (scrolledBottom){
@@ -188,7 +190,7 @@
 							}
 						}
 					})
-					.catch(Global.ErrorHandler.caught)
+					.catch(Global.ErrorHandler.caught);
 			},
 
 			handler_options_click:function(){
