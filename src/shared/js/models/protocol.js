@@ -59,6 +59,14 @@
 			self:false
 		},
 
+		//Register/Login
+		REGISTER_REQUEST:{
+			type:_TYPE.USER,
+			code:300,
+			from:null,
+			content:null
+		},
+
 		create:function(payload, params){
 			params = params || null;
 
