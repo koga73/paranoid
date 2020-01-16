@@ -13,17 +13,18 @@ module.exports = function(room, fromSocket, fromSocketMetadata, data){
 		}
 	}
 
-	var dataObj = null;
+	var dataObj = Object.assign({to:toRoom}, data);
+	var protocolObj = null;
 	if (fromSocket){
-		dataObj = Protocol.create(Protocol.MSG, Object.assign({to:toRoom}, data));
+		protocolObj = Protocol.create(Protocol.MSG, dataObj);
 	} else {
-		dataObj = Protocol.create(Protocol.SYS_MSG, Object.assign({to:toRoom}, data));
+		protocolObj = Protocol.create(Protocol.SYS_MSG, dataObj);
 	}
 	room.members.forEach((socket) => {
 		if (fromSocket && fromSocket.connectionId == socket.connectionId){
-			Send(socket, Protocol.create(Protocol.MSG, Object.assign({self:true}, data)), fromSocketMetadata);
+			Send(socket, Protocol.create(Protocol.MSG, Object.assign({self:true}, dataObj)), fromSocketMetadata);
 		} else {
-			Send(socket, dataObj);
+			Send(socket, protocolObj);
 		}
 	});
 };

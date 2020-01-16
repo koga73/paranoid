@@ -121,10 +121,18 @@
 
 				.from {
 					display:none;
+					background-color:transparent;
+
+					&:after {
+						content:":";
+						display:inline;
+					}
 				}
 				.content {
 					background-color:transparent;
 					padding:0;
+					display:inline;
+					clear:none;
 				}
 			}
 

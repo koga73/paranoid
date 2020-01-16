@@ -1,6 +1,8 @@
 (function(){
+	var MsgBus = Events.MsgBus;
+
 	OOP.namespace("SocketHandlers.OnMessage",
-		function(evt, sockets, fromUsername, relayPassphrase){
+		function(evt){
 			var socket = evt.srcElement;
 			var metadata = socket.metadata;
 			metadata.seqFromRelay++;
@@ -18,27 +20,28 @@
 			}
 			return promise
 				.then(function(msg){
-					var ret = {};
-
 					var data = JSON.parse(msg);
 					switch (data.code){
 
 						case Protocol.KEY.code:
-							caseKey(socket, metadata, data, relayPassphrase);
+							caseKey(socket, metadata, data);
 							break;
 
 						case Protocol.WELCOME.code:
-							caseWelcome(socket, metadata, data, sockets, fromUsername);
+							MsgBus.$emit(MsgBus.SEND_MSG, {
+								protocol:Protocol.JOIN,
+								to:data.room
+							});
 							break;
 
 						case Protocol.ROOM.code:
-							ret.context = caseRoom(socket, metadata, data);
+							MsgBus.$emit(MsgBus.JOINED_ROOM, Object.assign({}, data, {
+								relayName:metadata.relay.name
+							}));
 							break;
 					}
 
-					return Promise.resolve(Object.assign(ret, {
-						msg:data
-					}));
+					return Promise.resolve(data);
 				})
 				.catch(Global.ErrorHandler.caught);
 		}
@@ -79,18 +82,5 @@
 				});
 			})
 			.catch(Global.ErrorHandler.caught);
-	}
-
-	function caseWelcome(socket, metadata, data, sockets, fromUsername){
-		SocketHandlers.Send(sockets, Protocol.JOIN, fromUsername, data.room);
-	}
-
-	function caseRoom(socket, metadata, data){
-		Models.Room.rooms.push(new Models.Room({
-			name:data.name,
-			relayName:metadata.name,
-			members:data.members
-		}));
-		return "room:" + data.name; //Context
 	}
 })();

@@ -19,6 +19,10 @@
 			time:function(){
 				var dateTime = new Date(this.message.time);
 				return (dateTime.getMonth() + 1) + "/" + dateTime.getDate() + "/" + dateTime.getFullYear() + " " + dateTime.getHours() + ":" + dateTime.getMinutes() + "." + dateTime.getMilliseconds();
+			},
+
+			title:function(){
+				return this.message.from + "\n" + this.time;
 			}
 		}
 	});
