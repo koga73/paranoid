@@ -4,7 +4,7 @@
 
         static:new Vue({
 			data: {
-				CIPHERS:"update:_ciphers",
+				PREFERENCES:"update:_preferences",
 				RELAYS:"update:_relays",
 				ACCOUNTS:"update:_accounts"
 			}
