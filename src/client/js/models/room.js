@@ -6,7 +6,8 @@
 			name:"",
 			relayName:"",
 			iv:"",
-			memberCount:0
+			memberCount:0,
+			messages:[]
 		},
 
 		static:{
@@ -27,8 +28,7 @@
 					return (relayNamedRooms.length) ? namedRooms : null;
 				}
 			}
-		},
+		}
 
-        simple:true //We don't want OOP to add _super and _interface to the class since we are saving this in localStorage
     }));
 })();

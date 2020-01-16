@@ -1,6 +1,8 @@
 var Settings = require.main.require("./global/settings");
 
 module.exports = {
+	NAME_SYS:`${Settings.NAME} System`,
+
 	LISTENING:"Listening on http://localhost:{0}",
 	CLIENT_CONNECTED:"Client connected: {0}",
 	CLIENT_DISCONNECTED:"Client disconnected: {0}",

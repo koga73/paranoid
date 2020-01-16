@@ -296,30 +296,23 @@
 				<chat
 					inline-template
 					v-bind:is-crypto-supported="isCryptoSupported"
-					v-bind:ciphers="ciphers"
-					v-bind:relays="relays"
 					v-bind:accounts="accounts"
-					v-bind:_num-connected.sync="numConnected"
-					v-bind:_total-connections.sync="totalConnections"
-					v-bind:_connection-summary.sync="connectionSummary"
+					v-bind:context="context"
+					v-bind:system-messages="systemMessages"
 					v-bind:class="['component', {active:route == ''}]">
 					<section id="chat" class="wrap-large">
 
 						<div class="flex-v scroll-wrap">
 							<div class="top flex-grow flex-h">
 								<div class="left wrap-small flex-v panel">
-									<h2>Chat{{(contextName) ? " - " + contextName : ""}}</h2>
+									<h2>Chat{{(context) ? " - " + context.name : ""}}</h2>
 									<div class="flex-grow">
 										<div ref="messages-scroll" class="scroll-wrap">
 											<ol class="messages" v-if="isCryptoSupported">
 												<message inline-template v-for="message in messages" v-bind:message="message" v-bind:key="message.time">
-													<li v-bind:class="['clr', message.type, {self:message.self === true}]" v-bind:title="time">
-														<span class="from">
-															<span class="seo">From</span>{{message.type == "user" ? message.from : "system"}}
-														</span>
-														<span class="content">
-															{{content}}
-														</span>
+													<li v-bind:class="['clr', message.type, {self:message.self === true}]" v-bind:title="title">
+														<span class="from"><span class="seo">From</span>{{message.from}}</span>
+														<span class="content">{{content}}</span>
 													</li>
 												</message>
 											</ol>
@@ -434,7 +427,8 @@
 						ERROR_UNCAUGHT:"An unexpected error has occured.",
 
 						ERROR_INVALID_KEY:"invalid key",
-						ERROR_INVALID_ARRAY_LENGTH:"invalid array length"
+						ERROR_INVALID_ARRAY_LENGTH:"invalid array length",
+						ERROR_NO_DATA:"no data"
 					}
 
 				}));

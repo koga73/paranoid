@@ -50,6 +50,7 @@ const config = {
 				src + "client/js/resources/regex.js",
 				src + "client/js/services/storage.js",
 				src + "client/js/events/sync.js",
+				src + "client/js/events/msg-bus.js",
 				src + "client/js/models/cipher.js",
 				src + "client/js/models/relay.js",
 				src + "client/js/models/account.js",

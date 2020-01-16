@@ -28,6 +28,8 @@
 	);
 
 	function send(socket, msg){
+		console.log("Send::send", msg);
+
 		var metadata = socket.metadata;
 		metadata.seqFromClient++;
 
