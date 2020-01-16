@@ -57,7 +57,7 @@
 
 				var key = new Uint8Array(ivKey.key);
 				var hasRelayPassphrase = metadata.relay && metadata.relay.passphrase && metadata.relay.passphrase.length;
-				var promise = (hasRelayPassphrase) ? Helpers.Crypto.hash(metadata.relay.passphrase) : Promise.resolve(null);
+				var promise = (hasRelayPassphrase) ? Helpers.Crypto.hash(metadata.relay.passphrase, ivKey.extra) : Promise.resolve(null);
 				promise.then(function(hash){
 					if (hasRelayPassphrase){
 						//XOR key with passphrase hash

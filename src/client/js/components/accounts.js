@@ -21,6 +21,22 @@
                 }
 			},
 		},
+		mounted:function(){
+			//Load from window.ServerDefaults
+			if (window.ServerDefaults && window.ServerDefaults.accounts){
+				var accounts = window.ServerDefaults.accounts;
+				var accountsLen = accounts.length;
+				for (var i = 0; i < accountsLen; i++){
+					var account = accounts[i];
+					this.accounts.push(new Models.Account({
+						username:account.username,
+						publicKey:account.publicKey,
+						privateKey:account.privateKey,
+						fromServer:true
+					}));
+				}
+			}
+		},
 		methods:{
 			handler_account_remove:function(evt, account, index){
 				evt.preventDefault();

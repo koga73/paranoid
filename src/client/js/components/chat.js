@@ -20,6 +20,7 @@
 		},
 		props:[
 			//Non-sync
+			"isCryptoSupported",
 			"ciphers",
 			"relays",
 			"accounts",
@@ -270,6 +271,9 @@
 			relays:{
 				deep:true,
 				handler:function(){
+					if (!this.isCryptoSupported){
+						return;
+					}
 					var relays = this.relays;
 					var relaysLen = this.relays.length;
 					for (var i = 0; i < relaysLen; i++){

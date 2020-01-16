@@ -18,7 +18,7 @@ var _class = {
 
 	encrypt:function(iv, key, plaintext){
 		var cipher = crypto.createCipheriv(this.ALGORITHM_SYMMETRIC, key, iv);
-		var ciphertext = Buffer.concat([cipher.update(plaintext, "utf8"), cipher.final()]);
+		var ciphertext = Buffer.concat([cipher.update(plaintext, Settings.ENCODING), cipher.final()]);
 		var tag = cipher.getAuthTag();
 		var encrypted = Buffer.concat([ciphertext, tag]).toString("base64");
 		return Promise.resolve(encrypted);
@@ -28,7 +28,7 @@ var _class = {
 		var encrypted = Buffer.from(ciphertext, "base64");
 		var decipher = crypto.createDecipheriv(this.ALGORITHM_SYMMETRIC, key, iv);
 		decipher.setAuthTag(encrypted.slice(-this.TAG_LEN));
-		var decrypted = decipher.update(encrypted.slice(0, encrypted.length - this.TAG_LEN), "binary", "utf8") + decipher.final("utf8");
+		var decrypted = decipher.update(encrypted.slice(0, encrypted.length - this.TAG_LEN), "binary", Settings.ENCODING) + decipher.final(Settings.ENCODING);
 		return Promise.resolve(decrypted);
 	},
 
@@ -41,7 +41,9 @@ var _class = {
 
 		//XOR key with passphrase hash
 		if (Settings.PASSPHRASE && Settings.PASSPHRASE.length){
-			var hash = this.hash(Settings.PASSPHRASE);
+			var extra = sharedSecret.slice(this.IV_LEN, sharedSecret.byteLength - this.KEY_LEN);
+			//Use extra bits as salt
+			var hash = this.hash(Settings.PASSPHRASE, extra);
 			var keyLen = key.byteLength;
 			for (var i = 0; i < keyLen; i++){
 				key[i] ^= hash[i]; //XOR with passphrase hash
@@ -54,8 +56,14 @@ var _class = {
 		};
 	},
 
-	hash:function(phrase){
-		return new Uint8Array(crypto.createHash(this.ALGORITHM_HASH).update(phrase).digest().buffer);
+	hash:function(phrase, optionalRawSalt){
+		optionalRawSalt = optionalRawSalt || null;
+
+		var toHash = Buffer.from(phrase, Settings.ENCODING);
+		if (optionalRawSalt){
+			toHash = Buffer.concat([optionalRawSalt, toHash]);
+		}
+		return new Uint8Array(crypto.createHash(this.ALGORITHM_HASH).update(toHash).digest().buffer);
 	},
 
 	//GCM MUST NOT REUSE IV WITH SAME KEY

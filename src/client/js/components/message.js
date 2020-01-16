@@ -14,6 +14,12 @@
 		mounted:function(){
 			//TODO: Add check if not animating just show this.message.content
 			decryptAnimate(this, "content", this.message.raw, this.message.content);
+		},
+		computed:{
+			time:function(){
+				var dateTime = new Date(this.message.time);
+				return (dateTime.getMonth() + 1) + "/" + dateTime.getDate() + "/" + dateTime.getFullYear() + " " + dateTime.getHours() + ":" + dateTime.getMinutes() + "." + dateTime.getMilliseconds();
+			}
 		}
 	});
 

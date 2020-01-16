@@ -7,8 +7,8 @@ module.exports = {
 	ACTIVE_CONNECTIONS:"Active connections: {0}",
 
 	//DEFAULTS
-	ANONYMOUS:"Anonymous",
-	DEFAULT_ROOM:"Public",
+	DEFAULT_USER:Settings.DEFAULT_USER,
+	DEFAULT_ROOM:Settings.DEFAULT_ROOM,
 
 	//Errors
 	ERROR_EXISTS_SOCKET_ID:"socket id {0} already exists",

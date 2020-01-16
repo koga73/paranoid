@@ -17,6 +17,27 @@
 			IV_FIXED_CLIENT:0,
 			IV_FIXED_RELAY:0,
 
+			//At time of writing this code Edge does not support ECDH
+			isSupported:function(fail){
+				fail = fail === true;
+				if (fail){
+					return false;
+				}
+				return window.crypto != null && window.crypto.subtle != null;
+			},
+
+			initIV:function(){
+				//TODO: Make dynamic? Based on room?
+				return Promise.all([
+					_class.getIVFixed("client").then(function(code){
+						_class.IV_FIXED_CLIENT = code;
+					}),
+					_class.getIVFixed("relay").then(function(code){
+						_class.IV_FIXED_RELAY = code;
+					})
+				]);
+			},
+
 			encrypt:function(iv, key, plaintext){
 				var _this = this;
 				return new Promise(function(resolve, reject){
@@ -83,7 +104,8 @@
 								.then(function(secretKey){
 									resolve({
 										iv:secretKey.slice(0, _this.IV_LEN),
-										key:secretKey.slice(-_this.KEY_LEN)
+										key:secretKey.slice(-_this.KEY_LEN),
+										extra:secretKey.slice(_this.IV_LEN, secretKey.byteLength - _this.KEY_LEN)
 									});
 								})
 								.catch(reject);
@@ -99,8 +121,17 @@
 				}, false, []); //Not obvious but for chrome the usage array needs to be empty: https://stackoverflow.com/q/54179887/3610169
 			},
 
-			hash:function(phrase){
-				return crypto.subtle.digest(this.ALGORITHM_HASH, new TextEncoder().encode(phrase))
+			hash:function(phrase, optionalRawSalt){
+				optionalRawSalt = optionalRawSalt || null;
+
+				var toHash = new TextEncoder().encode(phrase);
+				if (optionalRawSalt){
+					var tmp = new Uint8Array(optionalRawSalt.byteLength + toHash.byteLength);
+					tmp.set(new Uint8Array(optionalRawSalt));
+					tmp.set(toHash, optionalRawSalt.byteLength);
+					toHash = tmp;
+				}
+				return crypto.subtle.digest(this.ALGORITHM_HASH, toHash)
 					.then(function(hash){
 						return Promise.resolve(new Uint8Array(hash));
 					});
@@ -184,11 +215,4 @@
 		}
 
 	}));
-	//TODO: Make dynamic? Based on room?
-	_class.getIVFixed("client").then(function(code){
-		_class.IV_FIXED_CLIENT = code;
-	});
-	_class.getIVFixed("relay").then(function(code){
-		_class.IV_FIXED_RELAY = code;
-	});
 })();

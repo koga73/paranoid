@@ -30,6 +30,7 @@ const config = {
 		files:{
 			input:[
 				src + "client/js/_lib/promise-polyfill.js",
+				src + "client/js/_lib/text-encoder-decoder.js",
 				src + "client/js/_lib/vue.js",
 				src + "client/js/_lib/axios.js",
 				src + "client/js/_lib/oop.js",

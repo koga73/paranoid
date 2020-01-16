@@ -231,7 +231,6 @@
 						<form ref="frmAccounts" class="bg-purp">
 							<div class="wrap">
 								<div class="scroll-wrap">
-									<!-- TODO: XSRF TOKEN -->
 									<table>
 										<thead>
 											<tr>
@@ -244,23 +243,23 @@
 										<tbody>
 											<tr v-for="(account, index) in accounts">
 												<td>{{account.username}}</td>
-												<td>{{(index) ? account.publicKey : "N/A"}}</td>
+												<td>{{account.publicKey || "N/A"}}</td>
 												<td>
-													<div class="check-wrap" v-if="index">
+													<div class="check-wrap" v-if="account.privateKey">
 														<input v-bind:id="'chkAccountShowPrivate_' + account.username" type="checkbox" v-model="account.showPrivate"/>
 														<label v-bind:for="'chkAccountShowPrivate_' + account.username">
 															{{!account.showPrivate ? "Show" : "Hide"}}
 														</label>
 													</div>
-													<span class="private">
+													<span class="private" v-if="account.privateKey && account.showPrivate">
 														{{account.privateKey}}
 													</span>
-													<span v-if="!index">N/A</span>
+													<span class="private-na" v-if="!account.privateKey">N/A</span>
 												</td>
 												<td>
-													<button class="btn" v-if="index" v-on:click="handler_account_remove($event, account, index)" title="Remove this account from your browser">Remove</button>
-													<button class="btn" v-if="index" v-on:click="handler_account_export($event, account)" title="Export this account to a downloadable json file">Export</button>
-													<button class="btn" v-if="index" v-on:click="handler_account_change($event, account)" title="Generate new keys and register the new public key with the relay">Change keys</button>
+													<button class="btn" v-on:click="handler_account_remove($event, account, index)" v-bind:disabled="account.fromServer" v-bind:title="(account.fromServer) ? 'This account was added by the server and cannot be removed' : 'Remove this account from your browser'">Remove</button>
+													<button class="btn" v-on:click="handler_account_export($event, account)" title="Export this account to a downloadable json file">Export</button>
+													<button class="btn" v-if="account.publicKey && account.privateKey" v-on:click="handler_account_change($event, account)" v-bind:disabled="account.fromServer" v-bind:title="(account.fromServer) ? 'This account was added by the server and cannot be changed' : 'Generate new keys and register the new public key with the relay'">Change keys</button>
 												</td>
 											</tr>
 											<tr>
@@ -296,6 +295,7 @@
 
 				<chat
 					inline-template
+					v-bind:is-crypto-supported="isCryptoSupported"
 					v-bind:ciphers="ciphers"
 					v-bind:relays="relays"
 					v-bind:accounts="accounts"
@@ -311,9 +311,9 @@
 									<h2>Chat{{(contextName) ? " - " + contextName : ""}}</h2>
 									<div class="flex-grow">
 										<div ref="messages-scroll" class="scroll-wrap">
-											<ol class="messages">
-												<message inline-template v-for="message in messages" v-bind:message="message">
-													<li v-bind:class="['clr', message.type, {self:message.self === true}]">
+											<ol class="messages" v-if="isCryptoSupported">
+												<message inline-template v-for="message in messages" v-bind:message="message" v-bind:key="message.time">
+													<li v-bind:class="['clr', message.type, {self:message.self === true}]" v-bind:title="time">
 														<span class="from">
 															<span class="seo">From</span>{{message.type == "user" ? message.from : "system"}}
 														</span>
@@ -323,6 +323,7 @@
 													</li>
 												</message>
 											</ol>
+											<p class="not-supported" v-if="!isCryptoSupported">Crypto is not supported by your browser<br/>Please use a modern browser such as Chrome or Firefox</p>
 										</div>
 									</div>
 								</div>
@@ -401,66 +402,44 @@
 				</div>
 			</footer>
 		</div>
-	</body>
 
-	<script>
-		/* This can be changed by the server if desired */
-		var ServerDefaults = {
-			"preferences":{
-				"ciphers":[
+		<script id="fromServer">
+			/* BEGIN_REPLACE_FROM_SERVER */
+			var ServerDefaults = {
+				"accounts":[
 					{
-						"name":"SHA-256",
-						"source":"//Built into browser",
-						"type":"hash"
-					},
-					{
-						"name":"ECDH-521",
-						"source":"//Built into browser",
-						"type":"asymmetric"
-					},
-					{
-						"name":"AES-GCM-256",
-						"source":"//Built into browser",
-						"type":"symmetric"
+						"username":"Anonymous"
 					}
 				]
-			},
-			"relays":[
-				{
-					"enabled":true,
-					"name":"localhost",
-					"address":"ws://localhost:8888",
-					"passphrase":"#pjY5?p.qZ+U;E!nF72W]p*C"
-				}
-			]
-		};
-	</script>
+			};
+			/* END_REPLACE_FROM_SERVER */
+		</script>
 
-	<script src="js/lib.js"></script>
-	<script>
-		/* Strings inline to make translation easier */
-		(function(){
-			OOP.namespace("Resources.Strings",
-			OOP.construct({
+		<script src="js/lib.js"></script>
+		<script>
+			/* Strings inline to make translation easier */
+			(function(){
+				OOP.namespace("Resources.Strings",
+				OOP.construct({
 
-				static:{
-					EXISTS_CIPHER:"Cipher {0} already exists",
-					EXISTS_RELAY:"Relay {0} already exists",
-					LOADED_CIPHER:"Cipher {0} loaded",
-					CONNECTED:"Connected:",
-					DISCONNECTED:"Disconnected:",
+					static:{
+						EXISTS_CIPHER:"Cipher {0} already exists",
+						EXISTS_RELAY:"Relay {0} already exists",
+						LOADED_CIPHER:"Cipher {0} loaded",
+						CONNECTED:"Connected:",
+						DISCONNECTED:"Disconnected:",
 
-					ERROR_NETWORK:"A network error has occured. Please check your connection and try again.",
-					ERROR_GENERAL:"An error has occured.",
-					ERROR_UNCAUGHT:"An unexpected error has occured.",
+						ERROR_NETWORK:"A network error has occured. Please check your connection and try again.",
+						ERROR_GENERAL:"An error has occured.",
+						ERROR_UNCAUGHT:"An unexpected error has occured.",
 
-					ERROR_INVALID_KEY:"invalid key",
-					ERROR_INVALID_ARRAY_LENGTH:"invalid array length"
-				}
+						ERROR_INVALID_KEY:"invalid key",
+						ERROR_INVALID_ARRAY_LENGTH:"invalid array length"
+					}
 
-			}));
-		})();
-	</script>
-	<script src="js/site.js"></script>
-
+				}));
+			})();
+		</script>
+		<script src="js/site.js"></script>
+	</body>
 </html>

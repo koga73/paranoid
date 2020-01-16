@@ -181,9 +181,9 @@ function validateFrom(from, required){
 		throw new RequestError(Resources.Strings.ERROR_INVALID_FROM);
 	}
 
-	const ANONYMOUS = Resources.Strings.ANONYMOUS;
-	if (from.toLowerCase() == ANONYMOUS.toLowerCase()){
-		return `${ANONYMOUS}-{0}`;
+	const DEFAULT_USER = Resources.Strings.DEFAULT_USER;
+	if (from.toLowerCase() == DEFAULT_USER.toLowerCase()){
+		return `${DEFAULT_USER}-{0}`;
 	}
 
 	//TODO: Validate digital signature for "from" username

@@ -4,6 +4,8 @@ require("./polyfill/base64.js");
 require("./polyfill/random.js");
 require("../shared/js/polyfill");
 
+const fs = require("fs");
+
 const Express = require("express");
 const Http = require("http");
 const WebSocketServer = require("ws").Server;
@@ -27,6 +29,8 @@ module.exports = (function(){
 		_server:null,
 		_socketServer:null,
 
+		_pageDefaultCache:null,
+
 		_consoleMode:null
 	};
 
@@ -46,17 +50,26 @@ module.exports = (function(){
 			//Express server
 			var app = Express();
 
+			//Hosts
+			if (Settings.HOSTS && Settings.HOSTS.length){
+				app.use(_methods._verifyHost);
+			}
+
 			//Body parser
 			app.use(BodyParser.urlencoded({extended:false}));
 			app.use(BodyParser.json());
 
-			//Static
-			app.use(Express.static(__dirname + "/../../www"));
+			//Get default page and inject with client server data
+			app.get("/", _methods._getDefaultPage);
+			app.get(Settings.PAGE_DEFAULT, _methods._getDefaultPage);
 
 			//Download portable
-			app.get("paranoid-portable.html", (req, res) => {
-				res.download(__dirname + "/../../www/paranoid-portable.html");
+			app.get(Settings.PAGE_PORTABLE, (req, res) => {
+				res.download(`${Settings.CLIENT_HTML_PATH}/${Settings.PAGE_PORTABLE}`);
 			});
+
+			//Static
+			app.use(Express.static(Settings.CLIENT_HTML_PATH));
 
 			//Node server
 			var server = Http.createServer(app);
@@ -71,8 +84,6 @@ module.exports = (function(){
 			server.listen(Settings.SERVER_PORT, () => {
 				console.log(Resources.Strings.LISTENING.format(Settings.SERVER_PORT));
 			});
-
-			//TODO: Host check!
 		},
 
 		destroy:function(){
@@ -196,6 +207,65 @@ module.exports = (function(){
 			console.log("          ", Log.COLORS.SYSTEM.RESET, "[ connections ] [ passphrase ] [ room:${room_name} ]");
 			console.log();
 			console.log();
+		},
+
+		_verifyHost:function(req, res, next){
+			var host = req.headers.host;
+			if (host){
+				if (Settings.HOSTS.indexOf(host.replace(/:\d+$/, "")) != -1){
+					next();
+					return;
+				}
+			}
+			res.statusCode = 404;
+			res.end();
+		},
+
+		_getDefaultPage:function(req, res, next){
+			var promise = null;
+			if (Settings.CACHE_PAGE_DEFAULT && !Settings.DEBUG){
+				if (_vars._pageDefaultCache){
+					promise = Promise.resolve(_vars._pageDefaultCache);
+				} else {
+					promise = _methods._getPageHtml(Settings.PAGE_DEFAULT)
+						.then((html) => {
+							_vars._pageDefaultCache = html;
+
+							return Promise.resolve(html);
+						});
+				}
+			} else {
+				promise = _methods._getPageHtml(Settings.PAGE_DEFAULT);
+			}
+			promise
+				.then((html) => {
+					res.send(html);
+				})
+				.catch((err) => {
+					ErrorHandler.handler_caught_exception(err);
+					res.statusCode = 500;
+				})
+				.finally(() => {
+					res.end();
+				});
+		},
+
+		//Grabs page html from file system and injects client server data
+		_getPageHtml:function(relativePath){
+			return new Promise((resolve, reject) => {
+				fs.readFile(`${Settings.CLIENT_HTML_PATH}/${relativePath}`, Settings.ENCODING, function(err, data){
+					if (err){
+						reject(err);
+						return;
+					}
+					resolve(data
+						.replace(
+							new RegExp(`${Settings.CLIENT_BEGIN_REPLACE}([\\s\\S]+)${Settings.CLIENT_END_REPLACE}`),
+							`var ServerDefaults = JSON.parse('${JSON.stringify(Settings.CLIENT_SERVER_DEFAULTS)}');`
+						)
+					);
+				});
+			});
 		}
 	};
 	_methods.init();

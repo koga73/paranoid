@@ -137,6 +137,7 @@ header {
 			&[download]{
 				text-decoration:underline;
 				width:space(2.5);
+				height:space(2.5);
 				margin-left:space(1);
 			}
 		}
@@ -151,6 +152,7 @@ header {
 			& > li {
 				display:inline-block;
 				width:space(2.5);
+				height:space(2.5);
 				margin:space(1);
 
 				a.active {

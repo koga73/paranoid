@@ -67,6 +67,10 @@
 	.panel.left {
 		.scroll-wrap {
 			border:1px solid $color-secondary-1-0;
+
+			p.not-supported {
+				margin:space(1);
+			}
 		}
 	}
 
