@@ -40,23 +40,10 @@ const primaryHost = Settings.HOSTS[Settings.HOSTS.length - 1];
 //This block gets written into script tag of hosted page
 Settings.CLIENT_SERVER_DEFAULTS = {
 	"preferences":{
-		"ciphers":[
-			{
-				"name":"SHA-256",
-				"source":"//Built into browser",
-				"type":"hash"
-			},
-			{
-				"name":"ECDH-521",
-				"source":"//Built into browser",
-				"type":"asymmetric"
-			},
-			{
-				"name":"AES-GCM-256",
-				"source":"//Built into browser",
-				"type":"symmetric"
-			}
-		]
+		"messages":{
+			"showTimes":false,
+			"disableDecryptAnimation":false
+		}
 	},
 	"relays":[
 		{

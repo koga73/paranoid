@@ -17,6 +17,7 @@
 		props:[
 			//Non-sync
 			"isCryptoSupported",
+			"preferences",
 			"accounts",
 			"context",
 			"systemMessages"

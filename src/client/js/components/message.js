@@ -9,11 +9,15 @@
 			};
 		},
 		props:[
+			"preferencesMessages",
 			"message"
 		],
 		mounted:function(){
-			//TODO: Add check if not animating just show this.message.content
-			decryptAnimate(this, "content", this.message.raw, this.message.content);
+			if (this.preferencesMessages && this.preferencesMessages.disableDecryptAnimation === true){
+				this.content = this.message.content;
+			} else {
+				decryptAnimate(this, "content", this.message.raw, this.message.content);
+			}
 		},
 		computed:{
 			time:function(){

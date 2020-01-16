@@ -50,83 +50,42 @@
 			</header>
 			<main class="flex-grow" v-cloak>
 
-				<preferences inline-template v-bind:_ciphers.sync="ciphers" v-bind:class="['component', {active:route == 'preferences'}]">
+				<preferences
+					inline-template
+					v-bind:_preferences.sync="preferences"
+					v-bind:class="['component', {active:route == 'preferences'}]">
+
 					<section id="preferences">
 						<div class="wrap">
 							<h2>Preferences</h2>
 						</div>
 
-						<section id="crypto" class="bg-purp">
+						<section id="messages" class="bg-purp">
 							<div class="wrap">
-								<h3>Crypto Plugins</h3>
-								<strong class="notes"><em>DO NOT MODIFY THIS SECTION UNLESS YOU TRUST THE CODE YOU ARE EXECUTING!</em></strong>
-								<ul class="notes">
-									<li>Some ciphers are supported out of the box such as RSA and AES.</li>
-									<li>To add a new cipher populate the "source" field with a link to javascript cipher code or raw javascript code</li>
-								</ul>
-								<button class="btn" v-if="!cryptoVisible" v-on:click="handler_showMeCrypto_click">I know what I'm doing</button>
-								<form ref="frmCrypto" class="scroll-wrap" v-if="cryptoVisible">
-									<table>
-										<thead>
-											<tr>
-												<th>Name</th>
-												<th>Type</th>
-												<th>Source</th>
-												<th>Actions</th>
-											</tr>
-										</thead>
-										<tbody>
-											<tr v-for="(cipher, index) in ciphers">
-												<td>{{cipher.name}}</td>
-												<td>{{cipher.type}}</td>
-												<td>
-													<div class="input-wrap">
-														<textarea readonly>{{cipher.source}}</textarea>
-													</div>
-												</td>
-												<td>
-													<button class="btn" v-on:click="handler_cipher_remove($event, cipher, index)" v-bind:disabled="cipher.fromServer" v-bind:title="(cipher.fromServer) ? 'This plugin was added by the server and cannot be removed' : 'Remove this cipher - To fully unload the cipher from memory you will need to refresh the page'">Remove</button>
-												</td>
-											</tr>
-											<!-- Disabled for now - This is more of a security hole than anything else. I'll probably end up removing this -->
-											<!--
-											<tr>
-												<td>
-													<div class="input-wrap">
-														<label for="txtCipherNewName" class="seo">Name</label>
-														<input type="text" id="txtCipherNewName" v-model="cipherNew.name" placeholder="Name" required minlength="1" maxlength="32" pattern="^[\w-]+$" autocomplete="off"/>
-													</div>
-												</td>
-												<td>
-													<div class="select-wrap">
-														<label for="sltType" class="seo">Type</label>
-														<select id="sltType" v-model="cipherNew.type" required>
-															<option v-for="cipherType in cipherTypes" value="cipherType">{{cipherType}}</option>
-														</select>
-													</div>
-												</td>
-												<td>
-													<div class="input-wrap">
-														<label for="txtCipherNewSource" class="seo" title="URL or raw javascript">Source</label>
-														<textarea id="txtCipherNewSource" v-model="cipherNew.source" placeholder="Source" required></textarea>
-													</div>
-												</td>
-												<td>
-													<button class="btn" type="submit" v-on:click="handler_cipher_loadSource($event)" title="Load cipher plugin from source field">Load from source</button>
-													<button class="btn" v-on:click="handler_cipher_loadDevice($event)" title="Load a cipher plugin from your device into your browser">Load from device</button>
-												</td>
-											</tr>
-											-->
-										</tbody>
-									</table>
-								</form>
+								<h3>Messages</h3>
+								<div class="check-wrap">
+									<input id="chkShowTimes" type="checkbox" v-model="messages.showTimes"/>
+									<label for="chkShowTimes">
+										<span>Show message times</span>
+									</label>
+								</div>
+								<div class="check-wrap">
+									<input id="chkDisableTextDecryptAnimation" type="checkbox" v-model="messages.disableDecryptAnimation"/>
+									<label for="chkDisableTextDecryptAnimation">
+										<span>Disable text decryption animation</span>
+									</label>
+								</div>
 							</div>
 						</section>
 
 					</section>
 				</preferences>
 
-				<relays inline-template v-bind:_relays.sync="relays" v-bind:class="['component', {active:route == 'relays'}]">
+				<relays
+					inline-template
+					v-bind:_relays.sync="relays"
+					v-bind:class="['component', {active:route == 'relays'}]">
+
 					<section id="relays">
 						<div class="wrap">
 							<h2>Manage Relays</h2>
@@ -216,7 +175,11 @@
 					</section>
 				</relays>
 
-				<accounts inline-template v-bind:ciphers="ciphers" v-bind:_accounts.sync="accounts" v-bind:class="['component', {active:route == 'accounts'}]">
+				<accounts
+					inline-template
+					v-bind:_accounts.sync="accounts"
+					v-bind:class="['component', {active:route == 'accounts'}]">
+
 					<section id="accounts">
 						<div class="wrap">
 							<h2>Accounts</h2>
@@ -296,10 +259,12 @@
 				<chat
 					inline-template
 					v-bind:is-crypto-supported="isCryptoSupported"
+					v-bind:preferences="preferences"
 					v-bind:accounts="accounts"
 					v-bind:context="context"
 					v-bind:system-messages="systemMessages"
 					v-bind:class="['component', {active:route == ''}]">
+
 					<section id="chat" class="wrap-large">
 
 						<div class="flex-v scroll-wrap">
@@ -309,12 +274,21 @@
 									<div class="flex-grow">
 										<div ref="messages-scroll" class="scroll-wrap">
 											<ol class="messages" v-if="isCryptoSupported">
-												<message inline-template v-for="message in messages" v-bind:message="message" v-bind:key="message.time">
+
+												<message
+													inline-template
+													v-bind:preferences-messages="preferences.messages"
+													v-for="message in messages"
+													v-bind:message="message"
+													v-bind:key="message.time">
+
 													<li v-bind:class="['clr', message.type, {self:message.self === true}]" v-bind:title="title">
 														<span class="from"><span class="seo">From</span>{{message.from}}</span>
+														<time v-if="preferencesMessages.showTimes === true">{{time}}</time>
 														<span class="content">{{content}}</span>
 													</li>
 												</message>
+
 											</ol>
 											<p class="not-supported" v-if="!isCryptoSupported">Crypto is not supported by your browser<br/>Please use a modern browser such as Chrome or Firefox</p>
 										</div>
@@ -416,9 +390,6 @@
 				OOP.construct({
 
 					static:{
-						EXISTS_CIPHER:"Cipher {0} already exists",
-						EXISTS_RELAY:"Relay {0} already exists",
-						LOADED_CIPHER:"Cipher {0} loaded",
 						CONNECTED:"Connected:",
 						DISCONNECTED:"Disconnected:",
 

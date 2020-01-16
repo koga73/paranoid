@@ -7,7 +7,7 @@
 		data:{
 			route:window.location.hash.substr(1),
 
-			ciphers:[],
+			preferences:{},
 			relays:[],
 			accounts:[],
 
