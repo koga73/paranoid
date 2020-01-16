@@ -6,8 +6,6 @@
 			};
 		},
 		props:[
-			//Non-sync
-			"ciphers",
 			//Sync
 			"_accounts"
 		],

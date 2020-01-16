@@ -101,7 +101,7 @@
 			width:100%;
 			margin:space(1) 0;
 
-			.from, .content {
+			.from, .content, time {
 				float:left;
 				clear:both;
 				background-color:$color-secondary-2-4;
@@ -116,22 +116,37 @@
 				padding:space(1);
 			}
 
+			time {
+				padding:space(0.5);
+				font-size:toEm(10);
+			}
+
 			&.system {
 				color:$color-complement-1;
 
 				.from {
 					display:none;
+					background-color:transparent;
+
+					&:after {
+						content:":";
+						display:inline;
+					}
 				}
 				.content {
 					background-color:transparent;
 					padding:0;
+				}
+				time {
+					background-color:transparent;
+					padding:space(0.5) 0;
 				}
 			}
 
 			&.self {
 				text-align:right;
 
-				.from, .content {
+				.from, .content, time {
 					float:right;
 					background-color:$color-primary-4;
 				}

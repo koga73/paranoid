@@ -19,8 +19,7 @@ const config = {
 			input:[
 				src + "client/*.html",
 				src + "client/**/vue.js",
-				src + "client/**/vue.min.js",
-				src + "shared/**/cipher-plugins/*.js",
+				src + "client/**/vue.min.js"
 			],
 			output:dst
 		}
@@ -51,7 +50,7 @@ const config = {
 				src + "client/js/resources/regex.js",
 				src + "client/js/services/storage.js",
 				src + "client/js/events/sync.js",
-				src + "client/js/models/cipher.js",
+				src + "client/js/events/msg-bus.js",
 				src + "client/js/models/relay.js",
 				src + "client/js/models/account.js",
 				src + "client/js/models/room.js",

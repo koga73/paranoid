@@ -21,12 +21,14 @@
 		WELCOME:{
 			type:_TYPE.SYSTEM,
 			code:110,
+			from:Strings.NAME_SYS || null,
 			content:Strings.PROTOCOL_WELCOME || null,
 			room:Strings.DEFAULT_ROOM
 		},
 		ROOM:{
 			type:_TYPE.SYSTEM,
 			code:120,
+			from:Strings.NAME_SYS || null,
 			content:Strings.PROTOCOL_ROOM || null,
 			name:null,
 			members:0
@@ -34,6 +36,7 @@
 		SYS_MSG:{
 			type:_TYPE.SYSTEM,
 			code:130,
+			from:Strings.NAME_SYS || null,
 			to:null,
 			content:null
 		},
@@ -47,7 +50,7 @@
 			type:_TYPE.USER,
 			code:210,
 			from:null,
-			to:null,
+			to:null, //Example: "room:public"
 			content:"join"
 		},
 		MSG:{
