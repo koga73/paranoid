@@ -30,9 +30,18 @@
 ## Build
 - ```npm run build```
 
+###### WebAuthn client code compilation
+You will need to build @webauthn/client code and copy output to _lib
+- ```cd node_modules/@webauthn/client```
+- ```npm i```
+- ```npm run build```
+- ```npm i -g babel```
+- ```babel ./dist/main.umd.js -o ./output.js```
+- Copy *output.js* to */src/client/js/_lib/webauthn-client.js*
+
 ## Run
 - ```npm run start```
-- https://localhost:8888
+- http://localhost:8888
 
 ### Debug
 - ```npm run start -- --debug```
