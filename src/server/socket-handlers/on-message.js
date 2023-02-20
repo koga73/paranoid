@@ -136,8 +136,8 @@ function caseMsg(socket, metadata, data){
 	var to = validateTo(data.to);
 	var content = validateContent(data.content);
 
-	if (Resources.Regex.TO.test(to)){
-		var roomName = Resources.Regex.TO.exec(to)[3];
+	if (Resources.Regex.CONTEXT_ROOM.test(to)){
+		var roomName = Resources.Regex.CONTEXT_ROOM.exec(to)[2];
 		var room = State.getRoom(roomName); //Will be created if doesn't already exist
 		Broadcast(room, socket, metadata, {
 			from:from,
@@ -150,7 +150,7 @@ function caseMsg(socket, metadata, data){
 }
 
 function caseJoin(socket, metadata, data){
-	var to = validateTo(data.to);
+	var to = validateTo(data.to, true, true);
 
 	var room = State.getRoom(to);
 	var roomName = room.name;
@@ -193,9 +193,10 @@ function validateFrom(from, required){
 	return from;
 }
 
-function validateTo(to, required){
+function validateTo(to, required, getRoom){
 	to = to || null;
 	required = required !== false;
+	getRoom = getRoom === true;
 
 	if (!to && required){
 		throw new RequestError(Resources.Strings.ERROR_NO_TO);
@@ -205,6 +206,9 @@ function validateTo(to, required){
 	}
 	if (!Resources.Regex.TO.test(to)){
 		throw new RequestError(Resources.Strings.ERROR_INVALID_TO);
+	}
+	if (getRoom && Resources.Regex.CONTEXT_ROOM.test(to)){
+		return Resources.Regex.CONTEXT_ROOM.exec(to)[2];
 	}
 
 	return to;

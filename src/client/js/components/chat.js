@@ -5,11 +5,13 @@
 		data:function(){
 			return {
 				message:"",
-
-				users:[],
-
-				username:"",
 				account:null,
+
+				//For joining a room
+				showJoinRoom:false,
+				joinRoomName:"",
+
+				users:[], //Temp
 
 				roomChangeHackVal:0
 			};
@@ -48,6 +50,13 @@
 				}, []);
 			},
 
+			username:function(){
+				if (this.account){
+					return this.account.username;
+				}
+				return null;
+			},
+
 			messages:function(){
 				var allMsgs = this.systemMessages;
 				if (this.context){
@@ -71,7 +80,6 @@
 		},
 		mounted:function(){
 			this.account = this.accounts[0];
-			this.username = this.account.username;
 
 			var txtMessage = this.$refs["txtMessage"];
 			txtMessage.focus();
@@ -127,12 +135,49 @@
 				return false;
 			},
 
-			handler_room_click:function(room){
-				this.context = "room:" + room.name;
+			handler_room_click:function(roomName){
+				console.log("chat::handler_room_click", roomName)
+
+				//TODO: Join room
+				MsgBus.$emit(MsgBus.SEND_MSG, {
+					protocol:Protocol.JOIN,
+					to:"room:" + roomName
+				});
 			},
 
-			handler_newRoom_click:function(){
-				console.log("chat::handler_newRoom_click");
+			handler_addRoom_click:function(){
+				this.showJoinRoom = !this.showJoinRoom;
+				if (this.showJoinRoom){
+					this.$nextTick(function(){
+						this.$refs["txtRoomName"].focus();
+					});
+				}
+			},
+
+			handler_joinRoom_click:function(evt){
+				evt.preventDefault();
+
+				//Validate form
+                var form = this.$refs["frmJoinRoom"];
+                if (!form.checkValidity()) {
+                    try {
+                        form.reportValidity();
+                    } catch(error) {
+                        //IE11 doesn't support
+                    }
+                    return false;
+				}
+
+				var roomName = this.joinRoomName;
+				this.showJoinRoom = false;
+				this.joinRoomName = "";
+
+				MsgBus.$emit(MsgBus.SEND_MSG, {
+					protocol:Protocol.JOIN,
+					to:"room:" + roomName
+				});
+
+				return false;
 			},
 
 			handler_newDirect_click:function(){

@@ -163,15 +163,16 @@
 					.then(function(data){
 						console.log("page::handler_socket_message", data);
 
-						if (socket.metadata.state != Models.SocketMetadata.STATE.KEY){
-							var msg = Object.assign({}, data, {raw:evt.data});
-							var to = msg.to || null;
-							//Hard-coded for now until we have more than one room
-							if (to && to.toLowerCase() == "room:public"){
-								_this.context.messages.push(msg);
-							} else {
-								_this.systemMessages.push(msg);
-							}
+						if (socket.metadata.state == Models.SocketMetadata.STATE.KEY){
+							return;
+						}
+						var msg = Object.assign({}, data, {raw:evt.data});
+						var to = msg.to || null;
+
+						if (to && to.toLowerCase() == "room:public"){
+							_this.context.messages.push(msg);
+						} else {
+							_this.systemMessages.push(msg);
 						}
 					})
 					.catch(Global.ErrorHandler.caught);

@@ -298,8 +298,17 @@
 									<div class="flex-v">
 										<div class="flex-h">
 											<h3 class="left flex-grow">Rooms</h3>
-											<button class="right btn btn-new" v-on:click="handler_newRoom_click" title="New room">+</button>
+											<button class="right btn btn-add" v-on:click="handler_addRoom_click" v-bind:title="showJoinRoom ? 'Cancel' : 'Add room'">
+												{{showJoinRoom ? "-" : "+"}}
+											</button>
 										</div>
+										<form ref="frmJoinRoom" class="flex-h" v-if="showJoinRoom">
+											<div class="left flex-grow input-wrap">
+												<label for="txtRoomName" class="seo">Room name</label>
+												<input ref="txtRoomName" id="txtRoomName" v-model="joinRoomName" placeholder="Room name" required minlength="1" maxlength="255" autocomplete="off"/>
+											</div>
+											<button type="submit" class="right btn" v-on:click="handler_joinRoom_click($event)" title="Join room">Join</button>
+										</form>
 										<div class="flex-grow">
 											<div class="scroll-wrap">
 												<ul>
@@ -313,7 +322,7 @@
 									<div class="flex-v">
 										<div class="flex-h">
 											<h3 class="left flex-grow">Direct Message</h3>
-											<button class="right btn btn-new" v-on:click="handler_newDirect_click" title="New direct message">+</button>
+											<button class="right btn btn-add" v-on:click="handler_newDirect_click" title="New direct message">+</button>
 										</div>
 										<div class="flex-grow">
 											<div class="scroll-wrap">

@@ -1,6 +1,5 @@
 const gulp = require("gulp");
 const sass = require("gulp-sass");
-const runSequence = require("run-sequence");
 const del = require("del");
 const createTask = require("./gulp/create-task");
 const concat = require("gulp-concat");
@@ -161,7 +160,7 @@ function watch(config){
 createTask("watch", watch, [config.static, config.js, config.jsLib, config.sass]);
 
 //portable
-gulp.task("portable", function(){
+createTask("portable", function(){
 	return gulp
 		.src(dst + "index.html")
 		.pipe(inlinesource({
@@ -172,4 +171,5 @@ gulp.task("portable", function(){
 		.pipe(gulp.dest(dst));
 });
 
-gulp.task("default", ["build"]);
+//Default
+//createTask("default", build);
